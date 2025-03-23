@@ -5,3 +5,4 @@ notebook
 kedro-datasets[pandas]
 pyarrow
 pycaret[models,mlops]
+kedro-mlflow

@@ -390,8 +390,13 @@ kedro==0.19.12
     # via
     #   -r requirements.in
     #   kedro-datasets
+    #   kedro-mlflow
     #   kedro-telemetry
 kedro-datasets[pandas,pandas-base,pandas-csvdataset,pandas-deltatabledataset,pandas-exceldataset,pandas-featherdataset,pandas-gbqquerydataset,pandas-gbqtabledataset,pandas-genericdataset,pandas-hdfdataset,pandas-jsondataset,pandas-parquetdataset,pandas-sqlquerydataset,pandas-sqltabledataset,pandas-xmldataset]==6.0.0
+    # via
+    #   -r requirements.in
+    #   kedro-mlflow
+kedro-mlflow==0.14.4
     # via -r requirements.in
 kedro-telemetry==0.6.2
     # via kedro
@@ -446,7 +451,9 @@ mdurl==0.1.2
 mistune==3.1.3
     # via nbconvert
 mlflow==2.21.0
-    # via pycaret
+    # via
+    #   kedro-mlflow
+    #   pycaret
 mlflow-skinny==2.21.0
     # via mlflow
 mlxtend==0.23.4
@@ -697,6 +704,7 @@ pydantic==2.10.6
     #   evidently
     #   fastapi
     #   gradio
+    #   kedro-mlflow
     #   mlflow-skinny
 pydantic-core==2.27.2
     # via pydantic
