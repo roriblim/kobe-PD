@@ -440,6 +440,7 @@ matplotlib==3.7.5
     #   pycaret
     #   pyod
     #   scikit-plot
+    #   seaborn
     #   statsforecast
     #   yellowbrick
 matplotlib-inline==0.1.7
@@ -531,6 +532,7 @@ numpy==1.26.4
     #   scikit-learn
     #   scikit-learn-intelex
     #   scipy
+    #   seaborn
     #   sktime
     #   statsforecast
     #   statsmodels
@@ -603,6 +605,7 @@ pandas[parquet]==2.1.4
     #   plotly-resampler
     #   pmdarima
     #   pycaret
+    #   seaborn
     #   sktime
     #   statsforecast
     #   statsmodels
@@ -874,6 +877,8 @@ scipy==1.11.4
     #   tbats
     #   xgboost
     #   yellowbrick
+seaborn==0.13.2
+    # via -r requirements.in
 semantic-version==2.10.0
     # via gradio
 send2trash==1.8.3

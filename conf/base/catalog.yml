@@ -7,6 +7,19 @@ raw_dev:
   type: pandas.ParquetDataset
   filepath: data/01_raw/dataset_kobe_dev.parquet
 
+primary_dev:
+  type: pandas.CSVDataset
+  filepath: data/03_primary/primary_dev.csv
+
 feature_dev:
   type: pandas.ParquetDataset
-  filepath: data/04_feature/kobe_feature_dev.parquet  
+  filepath: data/04_feature/data_filtered.parquet  
+
+data_train:
+  type: pandas.ParquetDataset
+  filepath: data/05_train/base_train.parquet
+
+data_test:
+  type: pandas.ParquetDataset
+  filepath: data/05_train/base_test.parquet
+
