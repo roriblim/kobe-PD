@@ -39,13 +39,30 @@ def feature_engineering(data):
 
 def separacao_treino_teste(data, random_state_param):
 
+    # parâmetro de proporção de teste
+    test_size = 0.2
+    mlflow.log_param("test_size", test_size)
+    mlflow.log_param("random_state", random_state_param)
+
     x_data = data.drop('shot_made_flag', axis=1)
     y_data = data[['shot_made_flag']]
 
-    x_data_train, x_data_test, y_data_train, y_data_test = train_test_split(x_data, y_data, test_size=0.2,
+    x_data_train, x_data_test, y_data_train, y_data_test = train_test_split(x_data, y_data, test_size=test_size,
     random_state=random_state_param, stratify=y_data)
 
     data_train = pd.concat([x_data_train, y_data_train], axis=1)
     data_test = pd.concat([x_data_test, y_data_test], axis=1)
+
+    # métricas sobre o tamanho das bases
+    mlflow.log_metric("num_linhas_dados_pós_preparacao", len(data))
+    mlflow.log_metric("num_linhas_treino", len(data_train))
+    mlflow.log_metric("num_linhas_teste", len(data_test))
+    mlflow.log_metric("proporcao_treino", len(data_train) / len(data))
+    mlflow.log_metric("proporcao_teste", len(data_test) / len(data))
+
+    # distribuição das classes
+    mlflow.log_metric("proporcao_positivos_total", data['shot_made_flag'].mean())
+    mlflow.log_metric("proporcao_positivos_treino", data_train['shot_made_flag'].mean())
+    mlflow.log_metric("proporcao_positivos_teste", data_test['shot_made_flag'].mean())
 
     return data_train, data_test
