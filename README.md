@@ -1,103 +1,145 @@
-# kobe
 
-[![Powered by Kedro](https://img.shields.io/badge/powered_by-kedro-ffc900?logo=kedro)](https://kedro.org)
+## PD - Projeto da Disciplina - Engenharia de Machine Learning
 
 ## Overview
 
 Para rodar este projeto, foi criado um ambiente com Python na versão 3.11
 
-This is your new Kedro project, which was generated using `kedro 0.19.12`.
+## Executando com Docker
 
-Take a look at the [Kedro documentation](https://docs.kedro.org) to get started.
+O projeto está configurado para ser executado usando Docker e Docker Compose. Esta é a maneira recomendada de executar o projeto, pois garante um ambiente consistente e isolado.
 
-## Rules and guidelines
+### Pré-requisitos
 
-In order to get the best out of the template:
+- Docker
+- Docker Compose
 
-* Don't remove any lines from the `.gitignore` file we provide
-* Make sure your results can be reproduced by following a data engineering convention
-* Don't commit data to your repository
-* Don't commit any credentials or your local configuration to your repository. Keep all your credentials and local configuration in `conf/local/`
+### Executando o projeto
 
-## How to install dependencies
+Para construir e iniciar os containers:
 
-Declare any dependencies in `requirements.txt` for `pip` installation.
-
-To install them, run:
-
+```bash
+docker-compose up --build
 ```
+
+Para executar em background:
+
+```bash
+docker-compose up -d --build
+```
+
+Para parar os containers:
+
+```bash
+docker-compose down
+```
+
+### Serviços disponíveis
+
+O projeto inclui três serviços:
+
+1. **kobe**: O serviço principal que mantém o ambiente rodando
+   - Porta 5000: MLflow UI
+   - Este serviço mantém o ambiente ativo para execução de comandos
+
+2. **jupyter**: Serviço dedicado para notebooks
+   - Porta 8888: Interface do Jupyter Notebook
+   - Acessível em `http://localhost:8888`
+
+3. **mlflow**: Interface do MLflow para visualização de experimentos
+   - Porta 5001: Interface web do MLflow
+   - Acessível em `http://localhost:5001`
+
+### Executando comandos no container
+
+Para executar comandos no container principal (como rodar o pipeline), você pode usar:
+
+```bash
+# Executar o pipeline
+docker-compose exec kobe kedro run
+
+# Executar outros comandos kedro
+docker-compose exec kobe kedro [comando]
+```
+
+### Volumes e persistência
+
+O projeto está configurado com os seguintes volumes:
+
+1. **Código Fonte**: Todo o diretório do projeto está montado como volume (`.:/app`), permitindo alterações no código sem precisar reconstruir a imagem.
+
+2. **Dados Persistentes**: Diretórios específicos são montados como volumes separados para garantir persistência e melhor performance:
+   - `./data`: Armazena os dados do projeto
+   - `./mlruns`: Armazena as métricas e experimentos do MLflow
+
+Para aplicar alterações no código:
+1. Faça as modificações nos arquivos do projeto e salve
+2. As alterações serão refletidas automaticamente no container
+3. Execute novamente o pipeline se necessário
+
+> **Nota**: Embora os diretórios `data` e `mlruns` já estejam incluídos no volume principal do projeto, eles são montados separadamente para garantir persistência e otimização de performance.
+
+## Executando de forma local sem Docker
+
+### Pré-requisitos
+
+- Python 3.11
+- pip (gerenciador de pacotes Python)
+
+### Configuração do ambiente
+
+1. Crie um ambiente virtual (recomendado):
+Exemplo:
+```bash
+# Criar ambiente virtual com Python 3.11
+python3.11 -m venv venv
+
+# Ativar o ambiente virtual
+source venv/bin/activate  # Linux/Mac
+# ou
+.\venv\Scripts\activate  # Windows
+```
+
+2. Instale as dependências:
+
+```bash
 pip install -r requirements.txt
 ```
 
-## How to run your Kedro pipeline
+### Executando o projeto
 
-You can run your Kedro project with:
+Para executar o pipeline Kedro:
 
-```
+```bash
 kedro run
 ```
 
-## How to test your Kedro project
+### Trabalhando com notebooks
 
-Have a look at the file `src/tests/test_run.py` for instructions on how to write your tests. You can run your tests as follows:
+O projeto inclui suporte para JupyterLab. Para usar o JupyterLab:
 
-```
-pytest
-```
-
-You can configure the coverage threshold in your project's `pyproject.toml` file under the `[tool.coverage.report]` section.
-
-
-## Project dependencies
-
-To see and update the dependency requirements for your project use `requirements.txt`. You can install the project requirements with `pip install -r requirements.txt`.
-
-[Further information about project dependencies](https://docs.kedro.org/en/stable/kedro_project_setup/dependencies.html#project-specific-dependencies)
-
-## How to work with Kedro and notebooks
-
-> Note: Using `kedro jupyter` or `kedro ipython` to run your notebook provides these variables in scope: `context`, 'session', `catalog`, and `pipelines`.
->
-> Jupyter, JupyterLab, and IPython are already included in the project requirements by default, so once you have run `pip install -r requirements.txt` you will not need to take any extra steps before you use them.
-
-### Jupyter
-To use Jupyter notebooks in your Kedro project, you need to install Jupyter:
-
-```
-pip install jupyter
+#### JupyterLab
+```bash
+kedro jupyter lab --no-browser
 ```
 
-After installing Jupyter, you can start a local notebook server:
 
-```
-kedro jupyter notebook
-```
 
-### JupyterLab
-To use JupyterLab, you need to install it:
+> **Nota**: Ao usar `kedro jupyter`, as seguintes variáveis estarão disponíveis no escopo: `context`, `session`, `catalog`, e `pipelines`.
 
-```
-pip install jupyterlab
-```
+### Visualizando experimentos com MLflow
 
-You can also start JupyterLab:
+Para iniciar o servidor MLflow localmente:
 
-```
-kedro jupyter lab
+```bash
+mlflow server --host 0.0.0.0 --port 5001
 ```
 
-### IPython
-And if you want to run an IPython session:
+A interface do MLflow estará disponível em `http://localhost:5001`
 
-```
-kedro ipython
-```
 
-### How to ignore notebook output cells in `git`
-To automatically strip out all output cell contents before committing to `git`, you can use tools like [`nbstripout`](https://github.com/kynan/nbstripout). For example, you can add a hook in `.git/config` with `nbstripout --install`. This will run `nbstripout` before anything is committed to `git`.
 
-> *Note:* Your output cells will be retained locally.
 
-## Package your Kedro project
 
-[Further information about building project documentation and packaging your project](https://docs.kedro.org/en/stable/tutorial/package_a_project.html)
+
+
