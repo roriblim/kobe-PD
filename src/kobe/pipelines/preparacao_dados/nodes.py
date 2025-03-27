@@ -6,7 +6,6 @@ import mlflow
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-
 def prepare_data(raw_dev):
 
     raw_data_unique = raw_dev.drop_duplicates()
@@ -37,10 +36,9 @@ def feature_engineering(data):
    
    return data
 
-def separacao_treino_teste(data, random_state_param):
+def separacao_treino_teste(data, random_state_param, test_size):
 
     # parâmetro de proporção de teste
-    test_size = 0.2
     mlflow.log_param("test_size", test_size)
     mlflow.log_param("random_state", random_state_param)
 

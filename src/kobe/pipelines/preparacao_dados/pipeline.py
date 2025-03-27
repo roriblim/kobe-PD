@@ -22,7 +22,7 @@ def create_pipeline(**kwargs) -> Pipeline:
         ),
         node(
             nodes.separacao_treino_teste,
-            inputs=["feature_dev", "params:stratified_random_state"],
+            inputs=["feature_dev", "params:stratified_random_state", "params:test_size"],
             outputs=["data_train", "data_test"],
             name="separacao_treino_teste_node"
         )
