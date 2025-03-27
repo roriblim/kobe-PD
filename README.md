@@ -50,6 +50,9 @@ O projeto inclui três serviços:
    - Porta 5001: Interface web do MLflow
    - Acessível em `http://localhost:5001`
 
+4. Após subir o projeto, é possível servir o modelo gerado com o comando MLFLOW_TRACKING_URI=file://$PWD/mlruns mlflow models serve -m models:/model_DT/latest --env
+-manager=local --port 5002
+
 ### Executando comandos no container
 
 Para executar comandos no container principal (como rodar o pipeline), você pode usar:
@@ -137,9 +140,14 @@ mlflow server --host 0.0.0.0 --port 5001
 
 A interface do MLflow estará disponível em `http://localhost:5001`
 
+### Servindo o modelo gerado com MLflow
 
+Após a criação do modelo, é possível subi-lo com o seguinte comando:
 
-
+```
+MLFLOW_TRACKING_URI=file://$PWD/mlruns mlflow models serve -m models:/model_DT/latest --env
+-manager=local --port 5002
+```
 
 
 
