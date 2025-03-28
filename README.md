@@ -17,7 +17,6 @@ Para rodar este projeto, foi criado um ambiente com Python na versão 3.11
 (...)
 
 
-
 ## Executando de forma local 
 
 ### Pré-requisitos
@@ -30,12 +29,8 @@ Para rodar este projeto, foi criado um ambiente com Python na versão 3.11
 1. Crie um ambiente virtual (recomendado):
 Exemplo:
 ```bash
-python3.11 -m venv venv
-
-# Ativar o ambiente virtual
-source venv/bin/activate  # Linux/Mac
-# ou
-.\venv\Scripts\activate  # Windows
+conda create --name PD_env_1 python=3.11 --no-default-packages -y
+conda activate PD_env_1
 ```
 
 2. Instale as dependências:
@@ -48,7 +43,7 @@ pip install -r requirements.txt
 Para iniciar o servidor MLflow localmente:
 
 ```bash
-mlflow server --host 0.0.0.0 --port 5001
+mlflow server --host 0.0.0.0 --port 5000
 ```
 
 ### Executando o projeto

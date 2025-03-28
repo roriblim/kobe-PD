@@ -13,5 +13,11 @@ def create_pipeline(**kwargs) -> Pipeline:
             inputs=["data_train", "data_test", "params:DT_session_id"],
             outputs="model_DT",
             name="train_model_pycaret_DT_node"
+        ),
+        node(
+            nodes.train_model_pycaret_RL,
+            inputs=["data_train", "data_test", "params:RL_session_id"],
+            outputs="model_RL",
+            name="train_model_pycaret_RL_node"
         )
     ])

@@ -6,7 +6,7 @@ import mlflow
 import pandas as pd
 import numpy as np
 from sklearn.metrics import log_loss, f1_score
-from pycaret.classification import *
+from pycaret.classification import ClassificationExperiment
 
 def train_model_pycaret_DT(data_train, data_test, session_id):
 
@@ -18,65 +18,75 @@ def train_model_pycaret_DT(data_train, data_test, session_id):
     mlflow.log_param("DT_data_train_shape", str(data_train.shape))
     mlflow.log_param("DT_data_test_shape", str(data_test.shape))
     
-    # Treinar o modelo
     dt_model = exp.create_model('dt')
-
-
-    # Versão mais nova do PyCaret pode retornar diretamente o modelo sklearn
     randcv_model = exp.tune_model(dt_model, n_iter=100, optimize='F1')
-    # Verificar se o objeto é um modelo sklearn ou um container do PyCaret
-    if hasattr(randcv_model, 'model'):
-        model_obj = randcv_model.model
-    else:
-        model_obj = randcv_model
-   
-            
-    # Avaliar o modelo e obter as métricas
-    train_predictions = exp.predict_model(model_obj, data=data_train)
-    test_predictions = exp.predict_model(model_obj, data=data_test)
+
+    test_log_loss, test_f1, test_predictions_binary = get_f1_and_log_loss_and_predictions(data_test, exp, randcv_model)
     
-    # Extrair as previsões de probabilidade
-    train_probs = train_predictions['prediction_score'].values
-    test_probs = test_predictions['prediction_score'].values
-    
-    # Extrair os valores reais
-    train_actual = data_train['shot_made_flag'].astype(int).values
-    test_actual = data_test['shot_made_flag'].astype(int).values
-    
-    # Calcular métricas - log loss
-    train_log_loss = log_loss(train_actual, train_probs)
-    test_log_loss = log_loss(test_actual, test_probs)
-    
-    # Calcular métricas - F1 score
-    train_predictions_binary = (train_probs >= 0.5).astype(int)
-    test_predictions_binary = (test_probs >= 0.5).astype(int)
-    train_f1 = f1_score(train_actual, train_predictions_binary)
-    test_f1 = f1_score(test_actual, test_predictions_binary)
-    
-    # Registrar métricas no MLflow
-    mlflow.log_metric("DT_train_log_loss", train_log_loss)
+    DT_predictions_parquet = "data/06_model/DT_test_predictions.parquet"
+    pd.DataFrame(test_predictions_binary).to_parquet(DT_predictions_parquet, index=False)
+
+    DT_predictions_csv = "data/06_model/DT_test_predictions.csv"
+    pd.DataFrame(test_predictions_binary).to_csv(DT_predictions_csv, index=False)
+
+    # Registro no MLFlow
     mlflow.log_metric("DT_test_log_loss", test_log_loss)
-    mlflow.log_metric("DT_train_f1_score", train_f1)
     mlflow.log_metric("DT_test_f1_score", test_f1)
+    mlflow.log_artifact(DT_predictions_parquet)
+    mlflow.log_artifact(DT_predictions_csv)
+
+    return randcv_model
+
+def train_model_pycaret_RL(data_train, data_test, session_id):
+
+    exp = ClassificationExperiment()
+    # desabilitando o log_experiment do Pycaret para evitar conflito com o MLflow
+    exp.setup(data=data_train, target='shot_made_flag', session_id=session_id, log_experiment=False)
+
+    mlflow.log_param("RL_model_type", "Regressão Logística")
+    mlflow.log_param("RL_data_train_shape", str(data_train.shape))
+    mlflow.log_param("RL_data_test_shape", str(data_test.shape))
     
-    # Registrar o modelo no MLflow
-    mlflow.sklearn.log_model(
-        model_obj, 
-        "decision_tree_model",
-        registered_model_name="DecisionTreeModel"
-    )
+    rl_model = exp.create_model('lr')
+    randcv_model = exp.tune_model(rl_model, n_iter=100, optimize='F1')
     
-    # # Registrar parâmetros importantes do modelo
-    # try:
-    #     # Tentar acessar diretamente os parâmetros do modelo
-    #     params = model_obj.get_params()
-    #     for param_name, param_value in params.items():
-    #         if not isinstance(param_value, (list, dict, set)) and param_value is not None:
-    #             mlflow.log_param(f"model_{param_name}", str(param_value))
-    # except:
-    #     # Se não conseguir acessar os parâmetros diretamente, registrar uma string
-    #     mlflow.log_param("model_info", str(model_obj))
+    test_log_loss, test_f1, test_predictions_binary = get_f1_and_log_loss_and_predictions(data_test, exp, randcv_model)
     
-    return model_obj
+    RL_predictions_parquet = "data/06_model/RL_test_predictions.parquet"
+    pd.DataFrame(test_predictions_binary).to_parquet(RL_predictions_parquet, index=False)
+
+    RL_predictions_csv = "data/06_model/RL_test_predictions.csv"
+    pd.DataFrame(test_predictions_binary).to_csv(RL_predictions_csv, index=False)
+
+    # Registro no MLFlow
+    mlflow.log_metric("RL_test_log_loss", test_log_loss)
+    mlflow.log_metric("RL_test_f1_score", test_f1)
+    mlflow.log_artifact(RL_predictions_parquet)
+    mlflow.log_artifact(RL_predictions_csv)
+    return randcv_model
+
+
+def compare_models(model1, model2):
+
+    # TO DO
+    best_model=model1
+    
+    return best_model
+
+def get_f1_and_log_loss_and_predictions(data_test, exp, randcv_model):
+    
+    test_predictions = exp.predict_model(randcv_model, data=data_test)
+    test_predicted_target = test_predictions['prediction_label']
+
+    test_probs = randcv_model.predict_proba(data_test.drop(columns=["shot_made_flag"]))
+    test_actual_target = data_test['shot_made_flag']
+
+    # Log Loss
+    test_log_loss = log_loss(test_actual_target, test_probs)
+    
+    # F1 score
+    test_f1 = f1_score(test_actual_target, test_predicted_target)
+
+    return test_log_loss, test_f1,test_predicted_target
 
 

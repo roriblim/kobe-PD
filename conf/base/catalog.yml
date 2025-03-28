@@ -23,12 +23,14 @@ data_test:
   type: pandas.ParquetDataset
   filepath: data/05_train/base_test.parquet
 
-# model_DT:
-#   type: pickle.PickleDataset
-#   filepath: data/06_model/model_DT.pkl
-#   versioned: true
 model_DT:
   type: kedro_mlflow.io.models.MlflowModelTrackingDataset
   flavor: mlflow.sklearn
   save_args:
     registered_model_name: model_DT
+
+model_RL:
+  type: kedro_mlflow.io.models.MlflowModelTrackingDataset
+  flavor: mlflow.sklearn
+  save_args:
+    registered_model_name: model_RL

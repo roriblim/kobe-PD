@@ -14,7 +14,6 @@ def prepare_data(raw_dev):
     raw_data_unique[['lat', 'lon','minutes_remaining','period','playoffs','shot_distance', 'shot_made_flag']]
     .dropna()
     .assign(playoffs = lambda x: x['playoffs'].astype(bool))
-    .assign(shot_made_flag = lambda x: x['shot_made_flag'].astype(bool))
     )
 
     # Registrar métricas
