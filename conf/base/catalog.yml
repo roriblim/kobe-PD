@@ -7,6 +7,10 @@ raw_dev:
   type: pandas.ParquetDataset
   filepath: data/01_raw/dataset_kobe_dev.parquet
 
+raw_prod:
+  type: pandas.ParquetDataset
+  filepath: data/01_raw/dataset_kobe_prod.parquet
+
 primary_dev:
   type: pandas.CSVDataset
   filepath: data/03_primary/primary_dev.csv
@@ -22,6 +26,14 @@ data_train:
 data_test:
   type: pandas.ParquetDataset
   filepath: data/05_model_input/base_test.parquet
+
+data_train_csv:
+  type: pandas.CSVDataset
+  filepath: data/05_model_input/base_train.csv
+
+data_test_csv:
+  type: pandas.CSVDataset
+  filepath: data/05_model_input/base_test.csv
 
 model_DT:
   type: kedro_mlflow.io.models.MlflowModelTrackingDataset

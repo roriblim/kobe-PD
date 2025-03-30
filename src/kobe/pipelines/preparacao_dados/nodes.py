@@ -62,4 +62,4 @@ def separacao_treino_teste(data, random_state_param, test_size):
     mlflow.log_metric("proporcao_positivos_treino", data_train['shot_made_flag'].mean())
     mlflow.log_metric("proporcao_positivos_teste", data_test['shot_made_flag'].mean())
 
-    return data_train, data_test
+    return data_train, data_test, data_train, data_test
