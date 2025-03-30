@@ -2,7 +2,8 @@
 This is a boilerplate pipeline 'treinamento'
 generated using Kedro 0.19.12
 """
-from kobe.pipelines.treinamento import CustomMLflowModel
+# from kobe.pipelines.treinamento.CustomMLflowModel import CustomMLflowModel
+from kobe.pipelines.treinamento.CustomMLflowModel import CustomMLflowModel
 import mlflow
 import pandas as pd
 import numpy as np
@@ -21,6 +22,7 @@ def train_model_pycaret_DT(data_train, data_test, session_id):
     mlflow.log_param("DT_data_train_shape", str(data_train.shape))
     mlflow.log_param("DT_data_test_shape", str(data_test.shape))
     
+
     dt_model = exp.create_model('dt')
     randcv_model = exp.tune_model(dt_model, n_iter=100, optimize='F1')
 
@@ -118,17 +120,8 @@ def salvar_modelo_pickle(randcv_model,nome_modelo):
 def create_API_model(best_model, model_test_metrics):
 
     api_model = CustomMLflowModel(best_model)
-    # model_name = model_test_metrics.loc[0, "Model"] 
-
-    salvar_modelo_pickle(api_model,"api_model.pkl")
+    salvar_modelo_pickle(api_model, "api_model.pkl")
     
     return api_model
 
-
-def register_API_model(api_model):
-    mlflow.pyfunc.log_model(
-        python_model=api_model, 
-        artifact_path="api_model", 
-        pyfunc_workflow="python_model"  
-    )
 

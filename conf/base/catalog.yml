@@ -63,14 +63,11 @@ best_model_test_metrics:
 
 api_model:
   type: kedro_mlflow.io.models.MlflowModelTrackingDataset
-  flavor: mlflow.pyfunc  # Tipo de modelo para pyfunc
-  artifact_path: "api_model"  # Caminho do artefato onde o modelo foi registrado
+  flavor: mlflow.pyfunc
+  pyfunc_workflow: python_model
   save_args:
-     {
-      registered_model_name: api_model,  # Nome do modelo registrado no MLflow
-      pyfunc_workflow: python_model
-    }
-
+    registered_model_name: api_model
+    artifact_path: "api_model"
 
 # api_model:
 #   type: kedro_mlflow.io.models.MlflowModelDataset

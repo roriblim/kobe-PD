@@ -31,11 +31,5 @@ def create_pipeline(**kwargs) -> Pipeline:
             inputs=["best_model", "best_model_test_metrics"],
             outputs="api_model",
             name="create_API_model_node"
-        ),
-        node(
-            nodes.register_API_model,
-            inputs=["api_model"],
-            outputs=None,
-            name="register_API_model_node"
         )
     ])
