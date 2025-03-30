@@ -30,7 +30,7 @@ Para rodar este projeto, foi criado um ambiente com Python na versão 3.11
 Exemplo:
 ```bash
 conda create --name PD_env_1 python=3.11 --no-default-packages -y
-conda activate PD_env_1
+conda activate PD_env_1 # sempre que for necessário executar comandos no projeto
 ```
 
 2. Instale as dependências:

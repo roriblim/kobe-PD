@@ -14,7 +14,6 @@ class CustomMLflowModel(mlflow.pyfunc.PythonModel):
         self.__dict__ = state
 
     def load_context(self, context):
-       
         print("Modelo carregado com sucesso")
 
     def preprocess(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -34,4 +33,7 @@ class CustomMLflowModel(mlflow.pyfunc.PythonModel):
     def predict(self, context, model_input: pd.DataFrame):
 
         processed_data = self.preprocess(model_input)
-        return self.model.predict(processed_data) 
+        predict_result = self.model.predict(processed_data)
+        predict_proba_result = self.model.predict_proba(processed_data)
+
+        return {"predictions": predict_result, "predict_proba": predict_proba_result}

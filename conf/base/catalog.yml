@@ -81,9 +81,4 @@ api_model:
     registered_model_name: api_model
     artifact_path: "api_model"
 
-# api_model:
-#   type: kedro_mlflow.io.models.MlflowModelDataset
-#   flavor: mlflow.pyfunc
-#   artifact_path: "api_model"
-#   save_args:
-#     registered_model_name: api_model
+
