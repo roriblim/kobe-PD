@@ -38,6 +38,7 @@ conda activate PD_env_1
 ```bash
 pip install -r requirements.txt
 ```
+
 ### Visualizando experimentos com MLflow
 
 Para iniciar o servidor MLflow localmente:
@@ -48,18 +49,24 @@ mlflow server --host 0.0.0.0 --port 5000
 
 ### Executando o projeto
 
-Para executar o pipeline Kedro:
+Para executar o pipeline Kedro (gerar as métricas, modelos e resultados, inclusive o modelo personalizado que será utilizado na API):
 
 ```bash
 kedro run
 ```
+
 ### Servindo o modelo gerado com MLflow
 
-Após a criação do modelo, é possível subi-lo com o seguinte comando:
+1. Após a criação do modelo com o kedro run, primeiro precisaremos instalar o projeto como um pacote Python no ambiente atual (para poder servir o modelo personalizado que criamos).
 
+```bash
+pip install -e .
 ```
-MLFLOW_TRACKING_URI=file://$PWD/mlruns mlflow models serve -m models:/model_DT/latest --env
--manager=local --port 5002
+
+2. Em seguida, é possível subi-lo com o seguinte comando:
+
+```bash
+MLFLOW_TRACKING_URI=file://$PWD/mlruns mlflow models serve -m models:/api_model/latest --env-manager=local --port 5002
 ```
 
 ### JupyterLab
