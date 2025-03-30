@@ -57,3 +57,6 @@ best_model:
   save_args:
     registered_model_name: best_model
   
+best_model_test_metrics:
+  type: pandas.CSVDataset
+  filepath: data/08_reporting/best_model_test_metrics.csv

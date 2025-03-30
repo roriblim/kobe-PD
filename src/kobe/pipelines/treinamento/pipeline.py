@@ -23,7 +23,7 @@ def create_pipeline(**kwargs) -> Pipeline:
         node(
             nodes.compare_models,
             inputs=["model_DT", "model_RL", "test_metrics_DT", "test_metrics_RL"],
-            outputs="best_model",
+            outputs=["best_model","best_model_test_metrics"],
             name="compare_models_node"
         )
     ])

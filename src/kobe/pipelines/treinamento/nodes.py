@@ -80,10 +80,16 @@ def train_model_pycaret_RL(data_train, data_test, session_id):
 
 def compare_models(model1, model2, test_metrics_1, test_metrics_2):
         
-    # TO DO
-    best_model=model1
+    if test_metrics_1.loc[0, "F1"]  > test_metrics_2.loc[0, "F1"] :
+        best_model=model1
+        best_model_test_metrics=test_metrics_1
+    else:
+        best_model=model2
+        best_model_test_metrics=test_metrics_2
+
+    salvar_modelo_pickle(best_model,"best_model.pkl")
     
-    return best_model
+    return best_model, best_model_test_metrics
 
 def get_f1_and_log_loss_and_predictions(data_test, exp, randcv_model):
     
