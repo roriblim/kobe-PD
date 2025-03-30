@@ -7,6 +7,8 @@ import pandas as pd
 import numpy as np
 from sklearn.metrics import log_loss, f1_score
 from pycaret.classification import ClassificationExperiment
+import pickle
+from pathlib import Path
 
 def train_model_pycaret_DT(data_train, data_test, session_id):
 
@@ -31,13 +33,16 @@ def train_model_pycaret_DT(data_train, data_test, session_id):
     DT_predictions_csv = "data/07_model_output/DT_test_predictions.csv"
     pd.DataFrame(test_predictions_binary).to_csv(DT_predictions_csv, index=False)
 
-    # Registro no MLFlow
+    # Registros
     mlflow.log_metric("DT_test_log_loss", test_log_loss)
     mlflow.log_metric("DT_test_f1_score", test_f1)
     mlflow.log_artifact(DT_predictions_parquet)
     mlflow.log_artifact(DT_predictions_csv)
+    
+    salvar_modelo_pickle(randcv_model,"DT_model.pkl")
 
     return randcv_model, metrics, pd.DataFrame(test_probs)
+
 
 def train_model_pycaret_RL(data_train, data_test, session_id):
 
@@ -62,16 +67,19 @@ def train_model_pycaret_RL(data_train, data_test, session_id):
     RL_predictions_csv = "data/07_model_output/RL_test_predictions.csv"
     pd.DataFrame(test_predictions_binary).to_csv(RL_predictions_csv, index=False)
 
-    # Registro no MLFlow
+    # Registros
     mlflow.log_metric("RL_test_log_loss", test_log_loss)
     mlflow.log_metric("RL_test_f1_score", test_f1)
     mlflow.log_artifact(RL_predictions_parquet)
     mlflow.log_artifact(RL_predictions_csv)
+    
+    salvar_modelo_pickle(randcv_model,"RL_model.pkl")
+
     return randcv_model, metrics, pd.DataFrame(test_probs)
 
 
-def compare_models(model1, model2):
-
+def compare_models(model1, model2, test_metrics_1, test_metrics_2):
+        
     # TO DO
     best_model=model1
     
@@ -93,4 +101,9 @@ def get_f1_and_log_loss_and_predictions(data_test, exp, randcv_model):
 
     return test_log_loss, test_f1,test_predicted_target, test_probs
 
-
+def salvar_modelo_pickle(randcv_model,nome_modelo):
+    save_path = Path("data/06_models/")
+    save_path.mkdir(parents=True, exist_ok=True)
+    model_path = save_path / nome_modelo
+    with open(model_path, "wb") as file:
+        pickle.dump(randcv_model, file)

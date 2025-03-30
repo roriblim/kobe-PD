@@ -51,4 +51,9 @@ test_probs_DT:
   type: pandas.CSVDataset
   filepath: data/07_model_output/DT_test_probs.csv
     
- 
+best_model:
+  type: kedro_mlflow.io.models.MlflowModelTrackingDataset
+  flavor: mlflow.sklearn
+  save_args:
+    registered_model_name: best_model
+  
