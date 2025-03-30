@@ -21,12 +21,14 @@ def train_model_pycaret_DT(data_train, data_test, session_id):
     dt_model = exp.create_model('dt')
     randcv_model = exp.tune_model(dt_model, n_iter=100, optimize='F1')
 
-    test_log_loss, test_f1, test_predictions_binary = get_f1_and_log_loss_and_predictions(data_test, exp, randcv_model)
+    test_log_loss, test_f1, test_predictions_binary, test_probs = get_f1_and_log_loss_and_predictions(data_test, exp, randcv_model)
     
-    DT_predictions_parquet = "data/06_model/DT_test_predictions.parquet"
+    metrics = exp.pull()
+
+    DT_predictions_parquet = "data/07_model_output/DT_test_predictions.parquet"
     pd.DataFrame(test_predictions_binary).to_parquet(DT_predictions_parquet, index=False)
 
-    DT_predictions_csv = "data/06_model/DT_test_predictions.csv"
+    DT_predictions_csv = "data/07_model_output/DT_test_predictions.csv"
     pd.DataFrame(test_predictions_binary).to_csv(DT_predictions_csv, index=False)
 
     # Registro no MLFlow
@@ -35,7 +37,7 @@ def train_model_pycaret_DT(data_train, data_test, session_id):
     mlflow.log_artifact(DT_predictions_parquet)
     mlflow.log_artifact(DT_predictions_csv)
 
-    return randcv_model
+    return randcv_model, metrics, pd.DataFrame(test_probs)
 
 def train_model_pycaret_RL(data_train, data_test, session_id):
 
@@ -50,12 +52,14 @@ def train_model_pycaret_RL(data_train, data_test, session_id):
     rl_model = exp.create_model('lr')
     randcv_model = exp.tune_model(rl_model, n_iter=100, optimize='F1')
     
-    test_log_loss, test_f1, test_predictions_binary = get_f1_and_log_loss_and_predictions(data_test, exp, randcv_model)
+    test_log_loss, test_f1, test_predictions_binary, test_probs = get_f1_and_log_loss_and_predictions(data_test, exp, randcv_model)
     
-    RL_predictions_parquet = "data/06_model/RL_test_predictions.parquet"
+    metrics = exp.pull()
+
+    RL_predictions_parquet = "data/07_model_output/RL_test_predictions.parquet"
     pd.DataFrame(test_predictions_binary).to_parquet(RL_predictions_parquet, index=False)
 
-    RL_predictions_csv = "data/06_model/RL_test_predictions.csv"
+    RL_predictions_csv = "data/07_model_output/RL_test_predictions.csv"
     pd.DataFrame(test_predictions_binary).to_csv(RL_predictions_csv, index=False)
 
     # Registro no MLFlow
@@ -63,7 +67,7 @@ def train_model_pycaret_RL(data_train, data_test, session_id):
     mlflow.log_metric("RL_test_f1_score", test_f1)
     mlflow.log_artifact(RL_predictions_parquet)
     mlflow.log_artifact(RL_predictions_csv)
-    return randcv_model
+    return randcv_model, metrics, pd.DataFrame(test_probs)
 
 
 def compare_models(model1, model2):
@@ -87,6 +91,6 @@ def get_f1_and_log_loss_and_predictions(data_test, exp, randcv_model):
     # F1 score
     test_f1 = f1_score(test_actual_target, test_predicted_target)
 
-    return test_log_loss, test_f1,test_predicted_target
+    return test_log_loss, test_f1,test_predicted_target, test_probs
 
 

@@ -17,11 +17,11 @@ feature_dev:
 
 data_train:
   type: pandas.ParquetDataset
-  filepath: data/05_train/base_train.parquet
+  filepath: data/05_model_input/base_train.parquet
 
 data_test:
   type: pandas.ParquetDataset
-  filepath: data/05_train/base_test.parquet
+  filepath: data/05_model_input/base_test.parquet
 
 model_DT:
   type: kedro_mlflow.io.models.MlflowModelTrackingDataset
@@ -34,3 +34,21 @@ model_RL:
   flavor: mlflow.sklearn
   save_args:
     registered_model_name: model_RL
+
+test_metrics_RL:
+  type: pandas.CSVDataset
+  filepath: data/08_reporting/RL_test_metrics.csv
+
+test_metrics_DT:
+  type: pandas.CSVDataset
+  filepath: data/08_reporting/DT_test_metrics.csv
+
+test_probs_RL:
+  type: pandas.CSVDataset
+  filepath: data/07_model_output/RL_test_probs.csv
+
+test_probs_DT:
+  type: pandas.CSVDataset
+  filepath: data/07_model_output/DT_test_probs.csv
+    
+ 
