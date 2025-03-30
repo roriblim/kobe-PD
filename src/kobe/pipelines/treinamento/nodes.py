@@ -2,6 +2,7 @@
 This is a boilerplate pipeline 'treinamento'
 generated using Kedro 0.19.12
 """
+from kobe.pipelines.treinamento import CustomMLflowModel
 import mlflow
 import pandas as pd
 import numpy as np
@@ -113,3 +114,21 @@ def salvar_modelo_pickle(randcv_model,nome_modelo):
     model_path = save_path / nome_modelo
     with open(model_path, "wb") as file:
         pickle.dump(randcv_model, file)
+
+def create_API_model(best_model, model_test_metrics):
+
+    api_model = CustomMLflowModel(best_model)
+    # model_name = model_test_metrics.loc[0, "Model"] 
+
+    salvar_modelo_pickle(api_model,"api_model.pkl")
+    
+    return api_model
+
+
+def register_API_model(api_model):
+    mlflow.pyfunc.log_model(
+        python_model=api_model, 
+        artifact_path="api_model", 
+        pyfunc_workflow="python_model"  
+    )
+
