@@ -18,7 +18,7 @@ class CustomMLflowModel(mlflow.pyfunc.PythonModel):
         print("Modelo carregado com sucesso")
 
     def preprocess(self, data: pd.DataFrame) -> pd.DataFrame:
-        data = (data[['lat', 'lon','minutes_remaining','period','playoffs','shot_distance', 'shot_made_flag','playoffs']]
+        data = (data[['lat', 'lon','minutes_remaining','period','playoffs','shot_distance']]
         # .assign(playoffs = lambda x: x['playoffs'].astype(bool))
         )        
         if "playoffs" in data.columns:
