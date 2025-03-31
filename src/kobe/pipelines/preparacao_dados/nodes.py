@@ -17,8 +17,8 @@ def prepare_data(raw_dev):
     )
 
     # Registrar métricas
-    mlflow.log_metric("num_linhas_raw", len(raw_dev))
-    mlflow.log_metric("num_linhas_primary", len(data))
+    mlflow.log_metric("num_linhas_raw_dev", len(raw_dev))
+    mlflow.log_metric("num_linhas_primary_dev", len(data))
 
     # Salvar um artefato
     data.to_csv("primary_dev.csv", index=False)
