@@ -68,6 +68,7 @@ best_model:
   flavor: mlflow.sklearn
   save_args:
     registered_model_name: best_model
+    pyfunc_predict_fn: predict_proba
   
 best_model_test_metrics:
   type: pandas.CSVDataset
