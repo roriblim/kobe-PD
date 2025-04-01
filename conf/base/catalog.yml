@@ -73,12 +73,4 @@ best_model_test_metrics:
   type: pandas.CSVDataset
   filepath: data/08_reporting/best_model_test_metrics.csv
 
-api_model:
-  type: kedro_mlflow.io.models.MlflowModelTrackingDataset
-  flavor: mlflow.pyfunc
-  pyfunc_workflow: python_model
-  save_args:
-    registered_model_name: api_model
-    artifact_path: "api_model"
-
 

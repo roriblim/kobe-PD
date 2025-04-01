@@ -2,8 +2,7 @@
 This is a boilerplate pipeline 'treinamento'
 generated using Kedro 0.19.12
 """
-# from kobe.pipelines.treinamento.CustomMLflowModel import CustomMLflowModel
-from kobe.pipelines.treinamento.CustomMLflowModel import CustomMLflowModel
+
 import mlflow
 import pandas as pd
 import numpy as np
@@ -110,12 +109,6 @@ def get_f1_and_log_loss_and_predictions(data_test, exp, randcv_model):
 
     return test_log_loss, test_f1,test_predicted_target, test_probs
 
-def create_API_model(best_model, model_test_metrics):
-
-    api_model = CustomMLflowModel(best_model)
-    salvar_modelo_pickle(api_model, "api_model.pkl")
-    
-    return api_model
 
 def salvar_modelo_pickle(randcv_model,nome_modelo):
     save_path = Path("data/06_models/")
