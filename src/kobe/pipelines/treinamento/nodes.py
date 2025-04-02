@@ -12,25 +12,7 @@ import pickle
 from pathlib import Path
 import matplotlib.pyplot as plt
 
-def salvar_curva_roc(y_true, y_pred_proba, modelo_nome):
 
-    fpr, tpr, _ = roc_curve(y_true, y_pred_proba[:, 1])
-    roc_auc = auc(fpr, tpr)
-    
-    plt.figure()
-    plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'ROC curve (AUC = {roc_auc:.2f})')
-    plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title(f'Curva ROC - {modelo_nome}')
-    plt.legend(loc="lower right")
-    
-    plt.savefig(f'data/08_reporting/roc_curve_{modelo_nome}.png')
-    plt.close()
-    
-    return roc_auc
 
 def train_model_pycaret_DT(data_train, data_test, session_id):
     exp = ClassificationExperiment()
@@ -50,6 +32,7 @@ def train_model_pycaret_DT(data_train, data_test, session_id):
     mlflow.log_metric("DT_roc_auc", roc_auc)
     
     metrics = exp.pull()
+    metrics['roc_auc'] = roc_auc
 
     DT_predictions_parquet = "data/07_model_output/DT_test_predictions.parquet"
     pd.DataFrame(test_predictions_binary).to_parquet(DT_predictions_parquet, index=False)
@@ -87,6 +70,7 @@ def train_model_pycaret_RL(data_train, data_test, session_id):
     mlflow.log_metric("RL_roc_auc", roc_auc)
     
     metrics = exp.pull()
+    metrics['roc_auc'] = roc_auc
 
     RL_predictions_parquet = "data/07_model_output/RL_test_predictions.parquet"
     pd.DataFrame(test_predictions_binary).to_parquet(RL_predictions_parquet, index=False)
@@ -106,7 +90,7 @@ def train_model_pycaret_RL(data_train, data_test, session_id):
 
 def compare_models(model1, model2, test_metrics_1, test_metrics_2):
         
-    if test_metrics_1.loc[0, "F1"]  > test_metrics_2.loc[0, "F1"] :
+    if test_metrics_1.loc[0, "roc_auc"]  > test_metrics_2.loc[0, "roc_auc"] :
         best_model=model1
         best_model_test_metrics=test_metrics_1
     else:
@@ -133,7 +117,6 @@ def get_f1_and_log_loss_and_predictions(data_test, exp, randcv_model):
 
     return test_log_loss, test_f1,test_predicted_target, test_probs
 
-
 def salvar_modelo_pickle(randcv_model,nome_modelo):
     save_path = Path("data/06_models/")
     save_path.mkdir(parents=True, exist_ok=True)
@@ -141,5 +124,22 @@ def salvar_modelo_pickle(randcv_model,nome_modelo):
     with open(model_path, "wb") as file:
         pickle.dump(randcv_model, file)
 
+def salvar_curva_roc(y_true, y_pred_proba, modelo_nome):
 
-
+    fpr, tpr, _ = roc_curve(y_true, y_pred_proba[:, 1])
+    roc_auc = auc(fpr, tpr)
+    
+    plt.figure()
+    plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'Curva ROC (AUC = {roc_auc:.2f})')
+    plt.plot([0, 1], [0, 1], color='blue', lw=2, linestyle='--')
+    plt.xlim([0.0, 1.10])
+    plt.ylim([0.0, 1.10])
+    plt.xlabel('Taxa Falsos Positivos')
+    plt.ylabel('Taxa Verdadeiros Positivos')
+    plt.title(f'Curva ROC - {modelo_nome}')
+    plt.legend(loc="lower right")
+    
+    plt.savefig(f'data/08_reporting/roc_curve_{modelo_nome}.png')
+    plt.close()
+    
+    return roc_auc
