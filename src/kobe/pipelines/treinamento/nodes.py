@@ -15,6 +15,9 @@ import matplotlib.pyplot as plt
 
 
 def train_model_pycaret_DT(data_train, data_test, session_id):
+
+    test_actual_target = data_test['shot_made_flag'].astype(int)
+
     exp = ClassificationExperiment()
     exp.setup(data=data_train, target='shot_made_flag', session_id=session_id, log_experiment=False)
 
@@ -24,34 +27,19 @@ def train_model_pycaret_DT(data_train, data_test, session_id):
 
     dt_model = exp.create_model('dt')
     randcv_model = exp.tune_model(dt_model, n_iter=100, optimize='F1')
+    model="DT"
 
-    test_log_loss, test_f1, test_predictions_binary, test_probs = get_f1_and_log_loss_and_predictions(data_test, exp, randcv_model)
-    
-    roc_auc = salvar_curva_roc(data_test['shot_made_flag'], test_probs, 'DT')
-    
-    metrics = exp.pull()
-    metrics['roc_auc'] = roc_auc
-    metrics['test_log_loss'] = test_log_loss
-    metrics['test_f1'] = test_f1
+    test_predicted_target, test_probs = get_and_save_predictions(data_test, exp, randcv_model, model)
+    metrics = get_and_save_metrics(test_actual_target, exp, test_predicted_target, test_probs, model)
 
-    DT_predictions_parquet = "data/07_model_output/DT_test_predictions.parquet"
-    pd.DataFrame(test_predictions_binary).to_parquet(DT_predictions_parquet, index=False)
-
-    DT_predictions_csv = "data/07_model_output/DT_test_predictions.csv"
-    pd.DataFrame(test_predictions_binary).to_csv(DT_predictions_csv, index=False)
-
-    mlflow.log_metric("DT_roc_auc", roc_auc)
-    mlflow.log_metric("DT_test_log_loss", test_log_loss)
-    mlflow.log_metric("DT_test_f1_score", test_f1)
-    mlflow.log_artifact(DT_predictions_parquet)
-    mlflow.log_artifact(DT_predictions_csv)
-    
     salvar_modelo_pickle(randcv_model,"DT_model.pkl")
 
     return randcv_model, metrics, pd.DataFrame(test_probs)
 
 
 def train_model_pycaret_RL(data_train, data_test, session_id):
+
+    test_actual_target = data_test['shot_made_flag'].astype(int)
 
     exp = ClassificationExperiment()
     # desabilitando o log_experiment do Pycaret para evitar conflito com o MLflow
@@ -63,31 +51,49 @@ def train_model_pycaret_RL(data_train, data_test, session_id):
     
     rl_model = exp.create_model('lr')
     randcv_model = exp.tune_model(rl_model, n_iter=100, optimize='F1')
-    
-    test_log_loss, test_f1, test_predictions_binary, test_probs = get_f1_and_log_loss_and_predictions(data_test, exp, randcv_model)
-    
-    roc_auc = salvar_curva_roc(data_test['shot_made_flag'], test_probs, 'RL')
+    model="RL"
+
+    test_predicted_target, test_probs = get_and_save_predictions(data_test, exp, randcv_model, model)
+    metrics = get_and_save_metrics(test_actual_target, exp, test_predicted_target, test_probs, model)
+
+    salvar_modelo_pickle(randcv_model,"RL_model.pkl")
+
+    return randcv_model, metrics, pd.DataFrame(test_probs)
+
+def get_and_save_metrics(test_actual_target, exp, test_predicted_target, test_probs, model):
+
+    test_log_loss = log_loss(test_actual_target, test_probs[:, 1])
+    test_f1 = f1_score(test_actual_target, test_predicted_target)
+    roc_auc = salvar_curva_roc(test_actual_target, test_probs, model)
     
     metrics = exp.pull()
+    
     metrics['roc_auc'] = roc_auc
     metrics['test_log_loss'] = test_log_loss
     metrics['test_f1'] = test_f1
 
-    RL_predictions_parquet = "data/07_model_output/RL_test_predictions.parquet"
-    pd.DataFrame(test_predictions_binary).to_parquet(RL_predictions_parquet, index=False)
+    mlflow.log_metric(f"{model}_roc_auc", roc_auc)
+    mlflow.log_metric(f"{model}_test_log_loss", test_log_loss)
+    mlflow.log_metric(f"{model}_test_f1_score", test_f1)
 
-    RL_predictions_csv = "data/07_model_output/RL_test_predictions.csv"
-    pd.DataFrame(test_predictions_binary).to_csv(RL_predictions_csv, index=False)
+    return metrics
 
-    mlflow.log_metric("RL_roc_auc", roc_auc)
-    mlflow.log_metric("RL_test_log_loss", test_log_loss)
-    mlflow.log_metric("RL_test_f1_score", test_f1)
-    mlflow.log_artifact(RL_predictions_parquet)
-    mlflow.log_artifact(RL_predictions_csv)
-    
-    salvar_modelo_pickle(randcv_model,"RL_model.pkl")
+def get_and_save_predictions(data_test, exp, randcv_model, model):
+    test_predictions = exp.predict_model(randcv_model, data=data_test)
+    test_predicted_target = test_predictions['prediction_label'].astype(int)
 
-    return randcv_model, metrics, pd.DataFrame(test_probs)
+    test_probs = randcv_model.predict_proba(data_test.drop(columns=["shot_made_flag"]))
+
+    predictions_parquet = f"data/07_model_output/{model}_test_predictions.parquet"
+    pd.DataFrame(test_predicted_target).to_parquet(predictions_parquet, index=False)
+
+    predictions_csv = f"data/07_model_output/{model}_test_predictions.csv"
+    pd.DataFrame(test_predicted_target).to_csv(predictions_csv, index=False)
+
+    mlflow.log_artifact(predictions_parquet)
+    mlflow.log_artifact(predictions_csv)
+
+    return test_predicted_target,test_probs
 
 
 def compare_models(model1, model2, test_metrics_1, test_metrics_2):
@@ -103,28 +109,13 @@ def compare_models(model1, model2, test_metrics_1, test_metrics_2):
     
     return best_model, best_model_test_metrics
 
-def get_f1_and_log_loss_and_predictions(data_test, exp, randcv_model):
-    
-    test_predictions = exp.predict_model(randcv_model, data=data_test)
-    test_predicted_target = test_predictions['prediction_label'].astype(int)
-
-    test_probs = randcv_model.predict_proba(data_test.drop(columns=["shot_made_flag"]))
-    test_actual_target = data_test['shot_made_flag'].astype(int)
-
-    # Log Loss
-    test_log_loss = log_loss(test_actual_target, test_probs[:, 1])
-    
-    # F1 score
-    test_f1 = f1_score(test_actual_target, test_predicted_target)
-
-    return test_log_loss, test_f1,test_predicted_target, test_probs
-
 def salvar_modelo_pickle(randcv_model,nome_modelo):
     save_path = Path("data/06_models/")
     save_path.mkdir(parents=True, exist_ok=True)
     model_path = save_path / nome_modelo
     with open(model_path, "wb") as file:
         pickle.dump(randcv_model, file)
+    mlflow.sklearn.log_model(randcv_model, nome_modelo)
 
 def salvar_curva_roc(y_true, y_pred_proba, modelo_nome):
 
