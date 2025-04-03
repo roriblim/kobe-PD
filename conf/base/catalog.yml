@@ -27,6 +27,14 @@ data_test:
   type: pandas.ParquetDataset
   filepath: data/05_model_input/base_test.parquet
 
+data_prod_x:
+  type: pandas.CSVDataset
+  filepath: data/05_model_input/base_prod_x.csv
+
+data_prod_y:
+  type: pandas.CSVDataset
+  filepath: data/05_model_input/base_prod_y.csv
+
 data_train_csv:
   type: pandas.CSVDataset
   filepath: data/05_model_input/base_train.csv
@@ -75,3 +83,26 @@ best_model_test_metrics:
   filepath: data/08_reporting/best_model_test_metrics.csv
 
 
+DT_data_prod_y_proba:
+  type: pandas.CSVDataset
+  filepath: data/07_model_output/DT_data_prod_y_proba.csv
+
+DT_data_prod_y_pred:
+  type: pandas.CSVDataset
+  filepath: data/07_model_output/DT_data_prod_y_pred.csv
+
+RL_data_prod_y_proba:
+  type: pandas.CSVDataset
+  filepath: data/07_model_output/RL_data_prod_y_proba.csv 
+
+RL_data_prod_y_pred:
+  type: pandas.CSVDataset
+  filepath: data/07_model_output/RL_data_prod_y_pred.csv  
+
+RL_metrics_prod:
+  type: pandas.CSVDataset
+  filepath: data/08_reporting/RL_prod_metrics.csv
+
+DT_metrics_prod:
+  type: pandas.CSVDataset
+  filepath: data/08_reporting/DT_prod_metrics.csv

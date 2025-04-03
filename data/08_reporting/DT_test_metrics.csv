@@ -1,2 +1,2 @@
-Model,Accuracy,AUC,Recall,Prec.,F1,Kappa,MCC,roc_auc
-Decision Tree Classifier,0.5317,0.5105,0.5818,0.5083,0.5426,0.0673,0.0679,0.510527001490342
+Model,Accuracy,AUC,Recall,Prec.,F1,Kappa,MCC,roc_auc,test_log_loss,test_f1
+Decision Tree Classifier,0.5317,0.5105,0.5818,0.5083,0.5426,0.0673,0.0679,0.510527001490342,13.928468755126955,0.54260953298026

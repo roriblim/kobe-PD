@@ -27,12 +27,12 @@ def train_model_pycaret_DT(data_train, data_test, session_id):
 
     test_log_loss, test_f1, test_predictions_binary, test_probs = get_f1_and_log_loss_and_predictions(data_test, exp, randcv_model)
     
-    # Gerar e salvar curva ROC
     roc_auc = salvar_curva_roc(data_test['shot_made_flag'], test_probs, 'DT')
-    mlflow.log_metric("DT_roc_auc", roc_auc)
     
     metrics = exp.pull()
     metrics['roc_auc'] = roc_auc
+    metrics['test_log_loss'] = test_log_loss
+    metrics['test_f1'] = test_f1
 
     DT_predictions_parquet = "data/07_model_output/DT_test_predictions.parquet"
     pd.DataFrame(test_predictions_binary).to_parquet(DT_predictions_parquet, index=False)
@@ -40,6 +40,7 @@ def train_model_pycaret_DT(data_train, data_test, session_id):
     DT_predictions_csv = "data/07_model_output/DT_test_predictions.csv"
     pd.DataFrame(test_predictions_binary).to_csv(DT_predictions_csv, index=False)
 
+    mlflow.log_metric("DT_roc_auc", roc_auc)
     mlflow.log_metric("DT_test_log_loss", test_log_loss)
     mlflow.log_metric("DT_test_f1_score", test_f1)
     mlflow.log_artifact(DT_predictions_parquet)
@@ -65,12 +66,12 @@ def train_model_pycaret_RL(data_train, data_test, session_id):
     
     test_log_loss, test_f1, test_predictions_binary, test_probs = get_f1_and_log_loss_and_predictions(data_test, exp, randcv_model)
     
-    # Gerar e salvar curva ROC
     roc_auc = salvar_curva_roc(data_test['shot_made_flag'], test_probs, 'RL')
-    mlflow.log_metric("RL_roc_auc", roc_auc)
     
     metrics = exp.pull()
     metrics['roc_auc'] = roc_auc
+    metrics['test_log_loss'] = test_log_loss
+    metrics['test_f1'] = test_f1
 
     RL_predictions_parquet = "data/07_model_output/RL_test_predictions.parquet"
     pd.DataFrame(test_predictions_binary).to_parquet(RL_predictions_parquet, index=False)
@@ -78,6 +79,7 @@ def train_model_pycaret_RL(data_train, data_test, session_id):
     RL_predictions_csv = "data/07_model_output/RL_test_predictions.csv"
     pd.DataFrame(test_predictions_binary).to_csv(RL_predictions_csv, index=False)
 
+    mlflow.log_metric("RL_roc_auc", roc_auc)
     mlflow.log_metric("RL_test_log_loss", test_log_loss)
     mlflow.log_metric("RL_test_f1_score", test_f1)
     mlflow.log_artifact(RL_predictions_parquet)
