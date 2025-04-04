@@ -19,7 +19,7 @@ def train_model_pycaret_DT(data_train, data_test, session_id):
     test_actual_target = data_test['shot_made_flag'].astype(int)
 
     exp = ClassificationExperiment()
-    exp.setup(data=data_train, target='shot_made_flag', session_id=session_id, log_experiment=False)
+    exp.setup(data=data_train, target='shot_made_flag', session_id=session_id)
 
     mlflow.log_param("DT_model_type", "Decision Tree")
     mlflow.log_param("DT_data_train_shape", str(data_train.shape))
@@ -42,8 +42,8 @@ def train_model_pycaret_RL(data_train, data_test, session_id):
     test_actual_target = data_test['shot_made_flag'].astype(int)
 
     exp = ClassificationExperiment()
-    # desabilitando o log_experiment do Pycaret para evitar conflito com o MLflow
-    exp.setup(data=data_train, target='shot_made_flag', session_id=session_id, log_experiment=False)
+    
+    exp.setup(data=data_train, target='shot_made_flag', session_id=session_id)
 
     mlflow.log_param("RL_model_type", "Regressão Logística")
     mlflow.log_param("RL_data_train_shape", str(data_train.shape))
@@ -132,7 +132,7 @@ def salvar_curva_roc(y_true, y_pred_proba, modelo_nome):
     plt.title(f'Curva ROC - {modelo_nome}')
     plt.legend(loc="lower right")
     
-    plt.savefig(f'data/08_reporting/roc_curve_{modelo_nome}.png')
+    plt.savefig(f'data/08_reporting/roc_curve_test_{modelo_nome}.png')
     plt.close()
     
     return roc_auc

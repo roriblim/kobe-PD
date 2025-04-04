@@ -5,6 +5,8 @@ generated using Kedro 0.19.12
 from sklearn.metrics import log_loss, f1_score, roc_curve, auc, accuracy_score, precision_score, recall_score
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import pickle
 
 def pre_process_predict(data):
 
@@ -21,25 +23,57 @@ def pre_process_predict(data):
     return data_processed_x, data_processed_y
 
 
-def predict(model, data_x):
+def predict_DT(data_x, data_y_actual):
 
+    model = pickle.load(open('data/06_models/DT_model.pkl', 'rb'))
     data_y_proba = model.predict_proba(data_x)
     data_y_pred = model.predict(data_x)
 
-    return pd.DataFrame(data_y_proba), pd.DataFrame(data_y_pred)
+    metrics_DT = get_metrics_prod(data_y_proba, data_y_pred, data_y_actual, "DT")
 
-def get_metrics_prod(data_y_proba, data_y_pred, data_y_actual):
+    return pd.DataFrame(data_y_proba), pd.DataFrame(data_y_pred), metrics_DT
+
+def predict_RL(data_x, data_y_actual):
+
+    model = pickle.load(open('data/06_models/RL_model.pkl', 'rb'))
+    data_y_proba = model.predict_proba(data_x)
+    data_y_pred = model.predict(data_x)
+
+    metrics_RL = get_metrics_prod(data_y_proba, data_y_pred, data_y_actual, "RL")
+
+    return pd.DataFrame(data_y_proba), pd.DataFrame(data_y_pred), metrics_RL
+
+def get_metrics_prod(data_y_proba, data_y_pred, data_y_actual, model_name):
 
     log_loss_prod = log_loss(data_y_actual, np.array(data_y_proba)[:, 1])
     f1_score_prod = f1_score(data_y_actual, data_y_pred)
     acuracia_prod = accuracy_score(data_y_actual, data_y_pred),
     precisao_prod = precision_score(data_y_actual, data_y_pred),
     recall_prod = recall_score(data_y_actual, data_y_pred)
-
+    roc_auc_prod = salvar_curva_roc(data_y_actual, np.array(data_y_proba), model_name)
 
     metrics_prod = pd.DataFrame({
-        "Metrica": ["Log Loss", "F1 Score", "Acurácia", "Precisão", "Recall"],
-        "Valor": [log_loss_prod, f1_score_prod, acuracia_prod, precisao_prod, recall_prod]
+        "Metrica": ["Log Loss", "F1 Score", "Acurácia", "Precisão", "Recall", "AUC"],
+        "Valor": [log_loss_prod, f1_score_prod, acuracia_prod, precisao_prod, recall_prod, roc_auc_prod]
     })
     return metrics_prod
 
+def salvar_curva_roc(y_true, y_pred_proba, model_name):
+
+    fpr, tpr, _ = roc_curve(y_true, y_pred_proba[:, 1])
+    roc_auc = auc(fpr, tpr)
+    
+    plt.figure()
+    plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'Curva ROC (AUC = {roc_auc:.2f})')
+    plt.plot([0, 1], [0, 1], color='blue', lw=2, linestyle='--')
+    plt.xlim([0.0, 1.10])
+    plt.ylim([0.0, 1.10])
+    plt.xlabel('Taxa Falsos Positivos')
+    plt.ylabel('Taxa Verdadeiros Positivos')
+    plt.title(f'Curva ROC produção - {model_name}')
+    plt.legend(loc="lower right")
+    
+    plt.savefig(f'data/08_reporting/roc_curve_prod_{model_name}.png')
+    plt.close()
+    
+    return roc_auc
