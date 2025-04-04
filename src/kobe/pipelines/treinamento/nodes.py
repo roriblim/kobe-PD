@@ -25,14 +25,18 @@ def train_model_pycaret_DT(data_train, data_test, session_id):
     mlflow.log_param("DT_data_train_shape", str(data_train.shape))
     mlflow.log_param("DT_data_test_shape", str(data_test.shape))
 
-    dt_model = exp.create_model('dt')
-    randcv_model = exp.tune_model(dt_model, n_iter=100, optimize='F1')
+    dt_model = exp.create_model('dt', max_depth=3)
+    randcv_model = exp.tune_model(dt_model, n_iter=400, optimize='F1')
     model="DT"
 
     test_predicted_target, test_probs = get_and_save_predictions(data_test, exp, randcv_model, model)
     metrics = get_and_save_metrics(test_actual_target, exp, test_predicted_target, test_probs, model)
 
     salvar_modelo_pickle(randcv_model,"DT_model.pkl")
+
+    if hasattr(randcv_model, "get_params"):
+        params = randcv_model.get_params()
+        mlflow.log_params({f"hiperparametro_DT__{k}": v for k, v in params.items()})
 
     return randcv_model, metrics, pd.DataFrame(test_probs)
 
@@ -58,6 +62,10 @@ def train_model_pycaret_RL(data_train, data_test, session_id):
 
     salvar_modelo_pickle(randcv_model,"RL_model.pkl")
 
+    if hasattr(randcv_model, "get_params"):
+        params = randcv_model.get_params()
+        mlflow.log_params({f"hiperparametro_RL__{k}": v for k, v in params.items()})
+
     return randcv_model, metrics, pd.DataFrame(test_probs)
 
 def get_and_save_metrics(test_actual_target, exp, test_predicted_target, test_probs, model):
@@ -72,7 +80,7 @@ def get_and_save_metrics(test_actual_target, exp, test_predicted_target, test_pr
     metrics['test_log_loss'] = test_log_loss
     metrics['test_f1'] = test_f1
 
-    mlflow.log_metric(f"{model}_roc_auc", roc_auc)
+    mlflow.log_metric(f"{model}_test_roc_auc", roc_auc)
     mlflow.log_metric(f"{model}_test_log_loss", test_log_loss)
     mlflow.log_metric(f"{model}_test_f1_score", test_f1)
 

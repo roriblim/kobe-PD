@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import pickle
+import mlflow
 
 def pre_process_predict(data):
 
@@ -56,6 +57,11 @@ def get_metrics_prod(data_y_proba, data_y_pred, data_y_actual, model_name):
         "Metrica": ["Log Loss", "F1 Score", "Acurácia", "Precisão", "Recall", "AUC"],
         "Valor": [log_loss_prod, f1_score_prod, acuracia_prod, precisao_prod, recall_prod, roc_auc_prod]
     })
+
+    mlflow.log_metric(f"{model_name}_prod_roc_auc", roc_auc_prod)
+    mlflow.log_metric(f"{model_name}_prod_log_loss", log_loss_prod)
+    mlflow.log_metric(f"{model_name}_prod_f1_score", f1_score_prod)
+
     return metrics_prod
 
 def salvar_curva_roc(y_true, y_pred_proba, model_name):
