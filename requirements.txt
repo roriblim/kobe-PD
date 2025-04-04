@@ -10,6 +10,8 @@ aiofiles==23.2.1
     # via gradio
 alembic==1.15.1
     # via mlflow
+altair==5.5.0
+    # via streamlit
 annotated-types==0.7.0
     # via pydantic
 antlr4-python3-runtime==4.9.3
@@ -53,7 +55,9 @@ binaryornot==0.4.4
 bleach[css]==6.2.0
     # via nbconvert
 blinker==1.9.0
-    # via flask
+    # via
+    #   flask
+    #   streamlit
 blosc2==3.2.0
     # via tables
 boto3==1.37.18
@@ -69,6 +73,7 @@ cachetools==5.5.2
     #   google-auth
     #   kedro
     #   mlflow-skinny
+    #   streamlit
 catboost==1.2.7
     # via pycaret
 category-encoders==2.7.0
@@ -96,6 +101,7 @@ click==8.1.8
     #   mlflow-skinny
     #   nltk
     #   rich-click
+    #   streamlit
     #   typer
     #   uvicorn
 cloudpickle==3.1.1
@@ -196,6 +202,7 @@ gitpython==3.1.44
     # via
     #   kedro
     #   mlflow-skinny
+    #   streamlit
 google-api-core[grpc]==2.24.2
     # via
     #   google-cloud-bigquery
@@ -310,6 +317,7 @@ jedi==0.19.2
     # via ipython
 jinja2==3.1.6
     # via
+    #   altair
     #   cookiecutter
     #   flask
     #   gradio
@@ -319,6 +327,7 @@ jinja2==3.1.6
     #   mlflow
     #   nbconvert
     #   pycaret
+    #   pydeck
 jmespath==1.0.1
     # via
     #   boto3
@@ -340,6 +349,7 @@ jsonpointer==3.0.0
     # via jsonschema
 jsonschema[format-nongpl]==4.23.0
     # via
+    #   altair
     #   jupyter-events
     #   jupyterlab-server
     #   nbformat
@@ -471,6 +481,8 @@ multipart==1.2.1
     # via litestar
 mypy-extensions==1.0.0
     # via typing-inspect
+narwhals==1.33.0
+    # via altair
 nbclient==0.10.2
     # via nbconvert
 nbconvert==7.16.6
@@ -528,6 +540,7 @@ numpy==1.26.4
     #   plotly-resampler
     #   pmdarima
     #   pycaret
+    #   pydeck
     #   pyod
     #   scikit-learn
     #   scikit-learn-intelex
@@ -536,6 +549,7 @@ numpy==1.26.4
     #   sktime
     #   statsforecast
     #   statsmodels
+    #   streamlit
     #   tables
     #   tbats
     #   triad
@@ -567,6 +581,7 @@ overrides==7.7.0
     # via jupyter-server
 packaging==24.2
     # via
+    #   altair
     #   build
     #   db-dtypes
     #   deprecation
@@ -590,6 +605,7 @@ packaging==24.2
     #   pytoolconfig
     #   sktime
     #   statsmodels
+    #   streamlit
     #   tables
 pandas[parquet]==2.1.4
     # via
@@ -609,6 +625,7 @@ pandas[parquet]==2.1.4
     #   sktime
     #   statsforecast
     #   statsmodels
+    #   streamlit
     #   triad
 pandas-gbq==0.28.0
     # via kedro-datasets
@@ -628,6 +645,7 @@ pillow==11.1.0
     # via
     #   gradio
     #   matplotlib
+    #   streamlit
 platformdirs==4.3.7
     # via
     #   blosc2
@@ -668,6 +686,7 @@ protobuf==5.29.4
     #   grpcio-status
     #   mlflow-skinny
     #   proto-plus
+    #   streamlit
 psutil==7.0.0
     # via
     #   ipykernel
@@ -691,6 +710,7 @@ pyarrow==18.1.0
     #   mlflow
     #   pandas
     #   pandas-gbq
+    #   streamlit
     #   triad
 pyasn1==0.6.1
     # via
@@ -713,6 +733,8 @@ pydantic-core==2.27.2
     # via pydantic
 pydata-google-auth==1.9.1
     # via pandas-gbq
+pydeck==0.9.1
+    # via streamlit
 pydub==0.25.1
     # via gradio
 pygments==2.19.1
@@ -791,6 +813,7 @@ requests==2.32.3
     #   mlflow-skinny
     #   pycaret
     #   requests-oauthlib
+    #   streamlit
 requests-oauthlib==2.0.0
     # via google-auth-oauthlib
 retrying==1.3.4
@@ -925,6 +948,8 @@ statsmodels==0.14.4
     #   pmdarima
     #   pycaret
     #   statsforecast
+streamlit==1.44.1
+    # via -r requirements.in
 stringcase==1.2.0
     # via dash
 tables==3.10.2
@@ -936,7 +961,9 @@ tbb==2022.1.0
 tcmlib==1.3.0
     # via tbb
 tenacity==9.0.0
-    # via plotly
+    # via
+    #   plotly
+    #   streamlit
 terminado==0.18.1
     # via
     #   jupyter-server
@@ -950,7 +977,9 @@ threadpoolctl==3.6.0
 tinycss2==1.4.0
     # via bleach
 toml==0.10.2
-    # via kedro
+    # via
+    #   kedro
+    #   streamlit
 tomlkit==0.13.2
     # via gradio
 tornado==6.4.2
@@ -960,6 +989,7 @@ tornado==6.4.2
     #   jupyter-server
     #   jupyterlab
     #   notebook
+    #   streamlit
     #   terminado
 tqdm==4.67.1
     # via
@@ -997,6 +1027,7 @@ types-python-dateutil==2.9.0.20241206
 typing-extensions==4.12.2
     # via
     #   alembic
+    #   altair
     #   anyio
     #   beautifulsoup4
     #   dash
@@ -1016,6 +1047,7 @@ typing-extensions==4.12.2
     #   referencing
     #   rich-click
     #   sqlalchemy
+    #   streamlit
     #   tables
     #   typer
     #   typing-inspect
@@ -1047,7 +1079,9 @@ uvicorn[standard]==0.34.0
 uvloop==0.21.0
     # via uvicorn
 watchdog==6.0.0
-    # via evidently
+    # via
+    #   evidently
+    #   streamlit
 watchfiles==1.0.4
     # via uvicorn
 wcwidth==0.2.13

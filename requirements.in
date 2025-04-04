@@ -7,3 +7,4 @@ pyarrow
 pycaret[models,mlops]
 kedro-mlflow
 seaborn
+streamlit
