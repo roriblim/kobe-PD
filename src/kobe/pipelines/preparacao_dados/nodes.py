@@ -18,11 +18,9 @@ def prepare_data(raw_dev):
     .assign(playoffs = lambda x: x['playoffs'].astype(bool))
     )
 
-    # Registrar métricas
     mlflow.log_metric("num_linhas_raw_dev", len(raw_dev))
     mlflow.log_metric("num_linhas_primary_dev", len(data))
 
-    # Salvar um artefato
     data.to_csv("primary_dev.csv", index=False)
     mlflow.log_artifact("primary_dev.csv")
 
@@ -52,12 +50,15 @@ def separacao_treino_teste(data, random_state_param, test_size):
     data_train = pd.concat([x_data_train, y_data_train], axis=1)
     data_test = pd.concat([x_data_test, y_data_test], axis=1)
 
-    plota_distribuicao_features(x_data_train)
+    plota_distribuicao_features(x_data_train,"train")
+    plota_distribuicao_features(x_data_test,"test")
 
     # métricas sobre o tamanho das bases
-    mlflow.log_metric("num_linhas_dados_pós_preparacao", len(data))
-    mlflow.log_metric("num_linhas_treino", len(data_train))
-    mlflow.log_metric("num_linhas_teste", len(data_test))
+    mlflow.log_metric("tamanho_linhas_dados_pós_preparacao", len(data))
+    mlflow.log_metric("tamanho_treino_linhas", data_train.shape[0])
+    mlflow.log_metric("tamanho_treino_colunas", data_train.shape[1])
+    mlflow.log_metric("tamanho_teste_linhas", data_test.shape[0])
+    mlflow.log_metric("tamanho_teste_colunas", data_test.shape[1])
     mlflow.log_metric("proporcao_treino", len(data_train) / len(data))
     mlflow.log_metric("proporcao_teste", len(data_test) / len(data))
 
@@ -68,7 +69,7 @@ def separacao_treino_teste(data, random_state_param, test_size):
 
     return data_train, data_test, data_train, data_test
 
-def plota_distribuicao_features(x_data_train):
+def plota_distribuicao_features(x_data_train, name):
     num_features = x_data_train.shape[1]
     cols = 3
     rows = (num_features // cols) + int(num_features % cols > 0)
@@ -85,7 +86,7 @@ def plota_distribuicao_features(x_data_train):
         fig.delaxes(axes[j])
 
     plt.tight_layout()    
-    plt.savefig(f'data/08_reporting/distribuicao_features_train.png')
+    plt.savefig(f'data/08_reporting/distribuicao_features_{name}.png')
     plt.close()
 
 

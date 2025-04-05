@@ -7,10 +7,12 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import pickle
+from kobe.pipelines.preparacao_dados.nodes import plota_distribuicao_features
 import mlflow
 
 def pre_process_predict(data):
 
+    
     data_processed = data.dropna()
     data_processed_x = (data_processed[['lat', 'lon','minutes_remaining','period','playoffs','shot_distance']]
         .assign(playoffs = lambda x: x['playoffs'].astype(bool))
@@ -18,6 +20,8 @@ def pre_process_predict(data):
     data_processed_x['lat_quadra'] = data_processed_x['lat'] - 34.0443
     data_processed_x['lon_quadra'] = data_processed_x['lon'] + 118.2698
     data_processed_x = data_processed_x.drop(columns=["lat", "lon"])
+
+    plota_distribuicao_features(data_processed_x,"prod")
 
     data_processed_y = data_processed[['shot_made_flag']]
 
