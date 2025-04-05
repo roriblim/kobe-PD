@@ -5,6 +5,8 @@ generated using Kedro 0.19.12
 import mlflow
 import pandas as pd
 from sklearn.model_selection import train_test_split
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 def prepare_data(raw_dev):
 
@@ -50,6 +52,8 @@ def separacao_treino_teste(data, random_state_param, test_size):
     data_train = pd.concat([x_data_train, y_data_train], axis=1)
     data_test = pd.concat([x_data_test, y_data_test], axis=1)
 
+    plota_distribuicao_features(x_data_train)
+
     # métricas sobre o tamanho das bases
     mlflow.log_metric("num_linhas_dados_pós_preparacao", len(data))
     mlflow.log_metric("num_linhas_treino", len(data_train))
@@ -63,3 +67,27 @@ def separacao_treino_teste(data, random_state_param, test_size):
     mlflow.log_metric("proporcao_positivos_teste", data_test['shot_made_flag'].mean())
 
     return data_train, data_test, data_train, data_test
+
+def plota_distribuicao_features(x_data_train):
+    num_features = x_data_train.shape[1]
+    cols = 3
+    rows = (num_features // cols) + int(num_features % cols > 0)
+
+    fig, axes = plt.subplots(rows, cols, figsize=(15, 5 * rows))
+    axes = axes.flatten()
+
+    for i, col in enumerate(x_data_train.columns):
+        sns.violinplot(y=x_data_train[col], ax=axes[i])
+        axes[i].set_title(f"Violinplot - {col}")
+        axes[i].set_xlabel("")
+    
+    for j in range(i + 1, len(axes)):
+        fig.delaxes(axes[j])
+
+    plt.tight_layout()    
+    plt.savefig(f'data/08_reporting/distribuicao_features_train.png')
+    plt.close()
+
+
+
+

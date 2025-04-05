@@ -1,5 +1,9 @@
 import streamlit as st
 import requests
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 
 def call_api(data):
 
@@ -17,6 +21,26 @@ def call_api(data):
     )
 
     return resp.json()
+
+def plot_distribuicao_e_dado_novo(df_treino, novo_dado):
+    cols = df_treino.columns
+    num_features = len(cols)
+    cols_plot = 3
+    rows_plot = (num_features // cols_plot) + int(num_features % cols_plot > 0)
+
+    fig, axes = plt.subplots(rows_plot, cols_plot, figsize=(15, 5 * rows_plot))
+    axes = axes.flatten()
+
+    for i, col in enumerate(cols):
+        sns.violinplot(y=df_treino[col], ax=axes[i], inner=None, color="skyblue")
+        axes[i].axhline(novo_dado[col], color='red', linestyle='--', label='Valor novo')
+        axes[i].set_title(col)
+        axes[i].legend()
+
+    for j in range(i + 1, len(axes)):
+        fig.delaxes(axes[j])
+
+    st.pyplot(fig)
 
 
 st.markdown("""
@@ -76,3 +100,8 @@ st.write(f'Probabilidade de acerto: {pred_cesta_resposta_acerto}')
 st.write(f'Probabilidade de erro: {pred_cesta_resposta_erro}')
 st.write(f'Previsão final: {is_acertou_msg}')
 
+df_treino = pd.read_csv("../data/05_model_input/base_train.csv")
+df_treino_x = df_treino.drop('shot_made_flag', axis=1)
+
+st.markdown("### Comparação - dados de treino e dado de produção enviado para a API")
+plot_distribuicao_e_dado_novo(df_treino_x, data_processed)
