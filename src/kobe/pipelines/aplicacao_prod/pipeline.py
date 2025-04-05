@@ -16,13 +16,13 @@ def create_pipeline(**kwargs) -> Pipeline:
         ),
         node(
             nodes.predict_DT,
-            inputs=["data_prod_x","data_prod_y"],
+            inputs=["data_prod_x","data_prod_y","model_DT"],
             outputs=["DT_data_prod_y_proba","DT_data_prod_y_pred","DT_metrics_prod"],
             name="DT_prod_predict_node"
         ),
          node(
             nodes.predict_RL,
-            inputs=["data_prod_x", "data_prod_y"],
+            inputs=["data_prod_x", "data_prod_y","model_RL"],
             outputs=["RL_data_prod_y_proba","RL_data_prod_y_pred", "RL_metrics_prod"],
             name="RL_prod_predict_node"
         ),              

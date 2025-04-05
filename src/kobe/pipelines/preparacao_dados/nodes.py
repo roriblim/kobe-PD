@@ -28,12 +28,15 @@ def prepare_data(raw_dev):
 
 def feature_engineering(data):
 
-   # a análise para chegar nesses parâmetros foi feita no notebook feature_engineering.ipynb
-   data['lat_quadra'] = data['lat'] - 34.0443
-   data['lon_quadra'] = data['lon'] + 118.2698
-   data = data.drop(columns=["lat", "lon"])
+    # a análise para chegar nesses parâmetros foi feita no notebook feature_engineering.ipynb
+    data['lat_quadra'] = data['lat'] - 34.0443
+    data['lon_quadra'] = data['lon'] + 118.2698
+    data = data.drop(columns=["lat", "lon"])
+
+    data.to_csv("data_filtered_dev.csv", index=False)
+    mlflow.log_artifact("data_filtered_dev.csv")
    
-   return data
+    return data
 
 def separacao_treino_teste(data, random_state_param, test_size):
 
@@ -66,6 +69,11 @@ def separacao_treino_teste(data, random_state_param, test_size):
     mlflow.log_metric("proporcao_positivos_total", data['shot_made_flag'].mean())
     mlflow.log_metric("proporcao_positivos_treino", data_train['shot_made_flag'].mean())
     mlflow.log_metric("proporcao_positivos_teste", data_test['shot_made_flag'].mean())
+
+    data_train.to_csv("base_train.csv", index=False)
+    mlflow.log_artifact("base_train.csv")
+    data_test.to_csv("base_test.csv", index=False)
+    mlflow.log_artifact("base_test.csv")
 
     return data_train, data_test, data_train, data_test
 

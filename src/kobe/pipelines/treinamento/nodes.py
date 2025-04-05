@@ -23,8 +23,6 @@ def train_model_pycaret_DT(data_train, data_test, session_id):
     exp.setup(data=data_train, target='shot_made_flag', session_id=session_id)
 
     mlflow.log_param("DT_model_type", "Decision Tree")
-    mlflow.log_param("DT_data_train_shape", str(data_train.shape))
-    mlflow.log_param("DT_data_test_shape", str(data_test.shape))
 
     dt_model = exp.create_model('dt', max_depth=3)
     randcv_model = exp.tune_model(dt_model, n_iter=400, optimize='F1')
@@ -56,8 +54,6 @@ def train_model_pycaret_RL(data_train, data_test, session_id):
     exp.setup(data=data_train, target='shot_made_flag', session_id=session_id)
 
     mlflow.log_param("RL_model_type", "Regressão Logística")
-    mlflow.log_param("RL_data_train_shape", str(data_train.shape))
-    mlflow.log_param("RL_data_test_shape", str(data_test.shape))
     
     rl_model = exp.create_model('lr')
     randcv_model = exp.tune_model(rl_model, n_iter=100, optimize='F1')

@@ -10,15 +10,16 @@ from kedro.pipeline import Pipeline
 
 
 
-
 def register_pipelines() -> dict[str, Pipeline]:
 
+    preparacao = preparacao_dados.create_pipeline()
+    treino = treinamento.create_pipeline()
+    aplicacao = aplicacao_prod.create_pipeline()
+
     pipelines = {
-        "preparacao_dados": preparacao_dados.create_pipeline(),
-        "treinamento": treinamento.create_pipeline(),
-        "aplicacao_prod": aplicacao_prod.create_pipeline(),
-        "__default__": preparacao_dados.create_pipeline() + treinamento.create_pipeline() + aplicacao_prod.create_pipeline(),
+        "preparacao_dados": preparacao,
+        "treinamento": treino,
+        "aplicacao_prod": aplicacao,
+        "__default__": preparacao + treino + aplicacao,
     }
     return pipelines
-
-

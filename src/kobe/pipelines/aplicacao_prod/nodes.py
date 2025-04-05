@@ -28,7 +28,7 @@ def pre_process_predict(data):
     return data_processed_x, data_processed_y
 
 
-def predict_DT(data_x, data_y_actual):
+def predict_DT(data_x, data_y_actual, model_DT):
 
     model = pickle.load(open('data/06_models/DT_model.pkl', 'rb'))
     data_y_proba = model.predict_proba(data_x)
@@ -38,7 +38,7 @@ def predict_DT(data_x, data_y_actual):
 
     return pd.DataFrame(data_y_proba), pd.DataFrame(data_y_pred), metrics_DT
 
-def predict_RL(data_x, data_y_actual):
+def predict_RL(data_x, data_y_actual, model_RL):
 
     model = pickle.load(open('data/06_models/RL_model.pkl', 'rb'))
     data_y_proba = model.predict_proba(data_x)
