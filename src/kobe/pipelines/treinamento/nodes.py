@@ -11,6 +11,7 @@ from pycaret.classification import ClassificationExperiment
 import pickle
 from pathlib import Path
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 
@@ -37,6 +38,11 @@ def train_model_pycaret_DT(data_train, data_test, session_id):
     if hasattr(randcv_model, "get_params"):
         params = randcv_model.get_params()
         mlflow.log_params({f"hiperparametro_DT__{k}": v for k, v in params.items()})
+
+    importances = randcv_model.feature_importances_
+    feature_names = data_train.drop(columns=["shot_made_flag"]).columns
+
+    plotar_importancia_features(model, importances, feature_names)
 
     return randcv_model, metrics, pd.DataFrame(test_probs)
 
@@ -66,7 +72,26 @@ def train_model_pycaret_RL(data_train, data_test, session_id):
         params = randcv_model.get_params()
         mlflow.log_params({f"hiperparametro_RL__{k}": v for k, v in params.items()})
 
+    coefs = randcv_model.coef_[0]
+    importances = np.abs(coefs)
+    feature_names = data_train.drop(columns=["shot_made_flag"]).columns
+
+    plotar_importancia_features(model, importances, feature_names)
+
     return randcv_model, metrics, pd.DataFrame(test_probs)
+
+def plotar_importancia_features(model, importances, feature_names):
+    feat_imp_df = pd.DataFrame({
+        "Feature": feature_names,
+        "Importance": importances
+    }).sort_values(by="Importance", ascending=False)
+
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x="Importance", y="Feature", data=feat_imp_df)
+    plt.title(f'Importância das Features - {model}')
+    plt.tight_layout()
+    plt.savefig(f'data/08_reporting/{model}_feature_importance.png')
+    plt.close()
 
 def get_and_save_metrics(test_actual_target, exp, test_predicted_target, test_probs, model):
 
