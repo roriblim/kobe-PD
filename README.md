@@ -74,7 +74,7 @@ MLFLOW_TRACKING_URI=file://$PWD/mlruns mlflow models serve -m models:/best_model
 ```bash
 # dentro da env, no diretório kobe/
 cd streamlit
-streamlit run main.py
+streamlit run main_API.py 
 ```
 
 ### JupyterLab
