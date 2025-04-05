@@ -1,6 +1,30 @@
-## PD - Projeto da Disciplina - Engenharia de Machine Learning
+## PD - Projeto da Disciplina - Engenharia de Machine Learning [25E1_3]
+#### Aluna: Rosana Ribeiro Lima
 
-(...)
+
+## Item 1.
+Link para o projeto no Github: 
+https://github.com/roriblim/kobe-PD
+
+## Item 2.
+#### Diagramas com as etapas do projeto:
+- Pipeline de preparação dos dados:
+
+![Pipeline de preparação dos dados](docs/pipeline-01-preparacao-dados.png)
+
+- Pipeline de treinamento dos modelos
+
+![Pipeline de treinamento dos modelos](docs/pipeline-02-treinamento.png)
+
+- Pipeline de aplicação dos modelos aos dados de produção
+
+![Pipeline de aplicação dos modelos aos dados de produção](docs/pipeline-03-aplicacao_prod.png)
+
+- Servindo o melhor modelo via MLflow e monitorando via Streamlit
+
+![Pipeline de preparação dos dados](docs/servindo-e-monitorando-modelo.png)
+
+## Item 3.
 
 
 ## Overview
