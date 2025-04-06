@@ -52,6 +52,60 @@ https://github.com/roriblim/kobe-PD
 - Como fornece uma interface gráfica para uso, o Streamlit pode ainda ser parte importante do **provisionamento/deployment** de uma aplicação.
 - No caso deste projeto, após encontrar o melhor modelo, ele foi servido via MLflow e em seguida chamado no Streamlit, onde foi possível: realizar a inferência dos dados e monitorar os dados que entram na aplicação em cada requisição, bem como compará-los com os dados de treinamento. Esse monitoramento dos dados de produção pode auxiliar na detecção de **data drift**, ou **feature drift**, e auxilia portanto a manter a saúde do modelo.
 
+## Item 4.
+#### Artefatos criados ao longo do projeto e sua descrição:
+ - Em data/01_raw:
+   - **dataset_kobe_dev.parquet**: dataset original com os dados iniciais (features e targets) de desenvolvimento no formato parquet;
+   - **dataset_kobe_prod.parquet**: dataset original com os dados iniciais (features e targets) de produção no formato parquet;
+   --------------   
+ - Em data/03_primary:
+   - **primary_dev.csv**: dataset com os dados de desenvolvimento após tratamento inicial dos dados (remoção de duplicatas, seleção das features que serão utilizadas no projeto, retirada de dados nulos e transformação de playoffs em booleano) em formato csv;
+   --------------
+ - Em data/04_feature:
+   - **data_filtered.parquet**: dataset com os dados de desenvolvimento após feature engineering (transformação de latitude e longitude em dados com maior informação para o modelo - posição na quadra - representados por lat_quadra e lon_quadra) em formato parquet;
+   --------------
+ - Em data/05_model_input:
+   - **base_prod_x.csv**: dataset com os dados das features de produção tratados e prontos para entrada no modelo, em formato csv;
+   - **base_prod_y.csv**: dataset com os dados dos targets de produção tratados e prontos para entrada no modelo, em formato csv;
+   - **base_test.csv**: dataset com os dados de features e targets de teste tratados e prontos para entrada no modelo, em formato csv (dados obtidos após a separação treino e teste de data_filtered.parquet);
+   - **base_test.parquet**: dataset com os dados de features e targets de teste tratados e prontos para entrada no modelo, em formato parquet (dados obtidos após a separação treino e teste de data_filtered.parquet);
+   - **base_train.csv**: dataset com os dados de features e targets de treino tratados e prontos para entrada no modelo, em formato csv (dados obtidos após a separação treino e teste de data_filtered.parquet);
+   - **base_train.parquet**: dataset com os dados de features e targets de treino tratados e prontos para entrada no modelo, em formato parquet (dados obtidos após a separação treino e teste de data_filtered.parquet);
+   --------------
+ - Em data/06_models:
+   - **best_model.pkl**: melhor modelo escolhido (entre Regressão Logística e Árvore de Decisão) em formato pickle, após treino, tunning de hiperparâmetros, validação e comparação entre modelos;
+   - **DT_model.pkl**: melhor modelo de Árvore de Decisão encontrado em formato pickle, após treino, tunning de hiperparâmetros e validação;
+   - **RL_model.pkl**: melhor modelo de Regressão Logística encontrado em formato pickle, após treino, tunning de hiperparâmetros e validação;
+   --------------
+ - Em data/07_model_output:
+   - **DT_data_prod_y_pred.csv**: resultado do predict (se acertou a cesta ou não) dos dados de produção pelo modelo de Árvore de Decisão (DT_model.pkl) em formato csv;
+   - **DT_data_prod_y_proba.csv**: resultado do predict_proba (probabilidades de acerto) dos dados de produção pelo modelo de Árvore de Decisão (DT_model.pkl) em formato csv;
+   - **DT_test_predictions.csv**: resultado do predict (se acertou a cesta ou não) dos dados de teste pelo modelo de Árvore de Decisão (DT_model.pkl) em formato csv;
+   - **DT_test_predictions.parquet**: resultado do predict (se acertou a cesta ou não) dos dados de teste pelo modelo de Árvore de Decisão (DT_model.pkl) em formato parquet;
+   - **DT_test_probs.csv**: resultado do predict_proba (probabilidades de acerto) dos dados de teste pelo modelo de Árvore de Decisão (DT_model.pkl) em formato csv;
+   - **inferencia_streamlit.csv**: log dos dados enviados para a API que serve o modelo; contém um histórico dos dados contidos nas requisições feitas, útil para monitoramento dos dados de produção.
+   - **RL_data_prod_y_pred.csv**: resultado do predict (se acertou a cesta ou não) dos dados de produção pelo modelo de Regressão Logística (RL_model.pkl) em formato csv;
+   - **RL_data_prod_y_proba.csv**: resultado do predict_proba (probabilidades de acerto) dos dados de produção pelo modelo de Regressão Logística (RL_model.pkl) em formato csv;
+   - **RL_test_predictions.csv**: resultado do predict (se acertou a cesta ou não) dos dados de teste pelo modelo de Regressão Logística (RL_model.pkl) em formato csv;
+   - **RL_test_predictions.parquet**: resultado do predict (se acertou a cesta ou não) dos dados de teste pelo modelo de Regressão Logística (RL_model.pkl) em formato parquet;
+   - **RL_test_probs.csv**: resultado do predict_proba (probabilidades de acerto) dos dados de teste pelo modelo de Regressão Logística (RL_model.pkl) em formato csv;
+   --------------
+ - Em data/08_reporting:
+   - **best_model_test_metrics.csv**: métricas do melhor modelo (best_model.pkl) após validação com os dados de teste - Acurácia,AUC,Recall,Precisão,F1,Kappa,MCC,roc_auc (área sob a curva ROC),test_log_loss (log loss medido com os dados de teste),test_f1 (F1 Score medido com os dados de teste);
+   - **distribuicao_features_prod.png**: gráficos que mostram a distribuição das features dos dados de produção plotada por meio de violinplot;
+   - **distribuicao_features_test.png**: gráficos que mostram a distribuição das features dos dados de teste plotada por meio de violinplot;
+   - **distribuicao_features_train.png**: gráficos que mostram a distribuição das features dos dados de treino plotada por meio de violinplot;
+   - **DT_feature_importance.png**: gráfico que mostra o grau de importância das features para predição pelo modelo de Árvore de Decisão (DT_model.pkl);
+   - **DT_prod_metrics.csv**: métricas da predição dos dados de produção pelo modelo de Árvore de Decisão (DT_model.pkl)  - Acurácia,AUC,Recall,Precisão,F1 Score e Log Loss;
+   - **DT_test_metrics.csv**: métricas do modelo de Árvore de Decisão (DT_model.pkl) após validação com os dados de teste - Acurácia,AUC,Recall,Precisão,F1,Kappa,MCC,roc_auc (área sob a curva ROC),test_log_loss (log loss medido com os dados de teste),test_f1 (F1 Score medido com os dados de teste);
+   - **RL_feature_importance.png**: gráfico que mostra o grau de importância das features para predição pelo modelo de Regressão Logística (RL_model.pkl);
+   - **RL_prod_metrics.csv**: métricas da predição dos dados de produção pelo modelo de Regressão Logística (RL_model.pkl) - Acurácia,AUC,Recall,Precisão,F1 Score e Log Loss;
+   - **RL_test_metrics.csv**: métricas do modelo de Regressão Logística (RL_model.pkl) após validação com os dados de teste - Acurácia,AUC,Recall,Precisão,F1,Kappa,MCC,roc_auc (área sob a curva ROC),test_log_loss (log loss medido com os dados de teste),test_f1 (F1 Score medido com os dados de teste);
+   - **roc_curve_prod_DT.png**: gráfico que mostra a curva ROC do modelo de Árvore de Decisão (DT_model.pkl) em relação aos dados de produção;
+   - **roc_curve_prod_RL.png**: gráfico que mostra a curva ROC do modelo de Regressão Logística (RL_model.pkl) em relação aos dados de produção;
+   - **roc_curve_test_DT.png**: gráfico que mostra a curva ROC do modelo de Árvore de Decisão (DT_model.pkl) em relação aos dados de teste;
+   - **roc_curve_test_RL.png**: gráfico que mostra a curva ROC do modelo de Regressão Logística (RL_model.pkl) em relação aos dados de teste.
+
 ## Overview
 
 Para rodar este projeto, foi criado um ambiente com Python na versão 3.11
