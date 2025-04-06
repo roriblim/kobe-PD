@@ -57,7 +57,8 @@ def separacao_treino_teste(data, random_state_param, test_size):
     plota_distribuicao_features(x_data_test,"test")
 
     # métricas sobre o tamanho das bases
-    mlflow.log_metric("tamanho_linhas_dados_pós_preparacao", len(data))
+    mlflow.log_metric("tamanho_dados_pós_preparacao_linhas", data.shape[0])
+    mlflow.log_metric("tamanho_dados_pós_preparacao_colunas", data.shape[1])
     mlflow.log_metric("tamanho_treino_linhas", data_train.shape[0])
     mlflow.log_metric("tamanho_treino_colunas", data_train.shape[1])
     mlflow.log_metric("tamanho_teste_linhas", data_test.shape[0])

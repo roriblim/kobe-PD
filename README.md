@@ -8,18 +8,21 @@ https://github.com/roriblim/kobe-PD
 
 ## Item 2.
 #### Diagramas com as etapas do projeto:
+Este projeto segue a estrutura Kedro, e também é rastreado pelo MLflow. Portanto, os artefatos são armazenados no diretório data/, e os parâmetros, métricas e artefatos monitorados pelo MLflow são armazenados em mlruns/.
+Foram utilizadas três pipelines, as quais se encontram descritas nos diagramas a seguir:
 - Pipeline de preparação dos dados:
 
 ![Pipeline de preparação dos dados](docs/pipeline-01-preparacao-dados.png)
 
-- Pipeline de treinamento dos modelos
+- Pipeline de treinamento dos modelos:
 
 ![Pipeline de treinamento dos modelos](docs/pipeline-02-treinamento.png)
 
-- Pipeline de aplicação dos modelos aos dados de produção
+- Pipeline de aplicação dos modelos aos dados de produção:
 
 ![Pipeline de aplicação dos modelos aos dados de produção](docs/pipeline-03-aplicacao_prod.png)
 
+Além disso, após a execução do projeto, o melhor modelo foi servido em uma API via MLflow, e chamado dentro do Streamlit, conforme o diagrama a seguir:
 - Servindo o melhor modelo via MLflow e monitorando via Streamlit
 
 ![Pipeline de preparação dos dados](docs/servindo-e-monitorando-modelo.png)
@@ -106,28 +109,60 @@ https://github.com/roriblim/kobe-PD
    - **roc_curve_test_DT.png**: gráfico que mostra a curva ROC do modelo de Árvore de Decisão (DT_model.pkl) em relação aos dados de teste;
    - **roc_curve_test_RL.png**: gráfico que mostra a curva ROC do modelo de Regressão Logística (RL_model.pkl) em relação aos dados de teste.
 
-## Overview
+## Item 5.
+#### Pipeline de processamento de dados
 
-Para rodar este projeto, foi criado um ambiente com Python na versão 3.11
+A pipeline de processamento de dados se chama preparacao_dado.
+
+**a**. Os dados iniciais estão armazenados em data/01_raw, com o nome de dataset_kobe_dev.parquet e dataset_kobe_prod.parquet.
+**b**. As linhas duplicadas foram removidas, as linhas com dados faltantes foram desconsideradas, conforme solicitado, e foram consideradas apenas as colunas lat, lon, minutes remaining, period, playoffs, shot_distance, conforme solicitado. Os dados resultantes estão em data/03_primary, no arquivo primary_dev.csv.
+ Em seguida, as colunas lat e lon foram transformadas a fim de extrair dados mais úteis para a predição: a partir delas foram obtidas as colunas lat_quadra e lon_quadra. Os dados resultantes estão em data/04_feature, no arquivo data_filtered.parquet.
+ A dimensão resultante do data_filtered.parquet é de 20285 linhas e 7 colunas, como é possível verificar nas métricas do mlflow:
+ ![Tamanho dos dados de dev antes da entrada no modelo](docs/mlflow/mlflow-tamanho-data-dev-pre-modelo.png)
+
+Na última etapa do pré-processamento, os dados foram separados em treino (80%) e teste (20%), de forma aleatória e estratificada. Pela imagem acima também é possível ver o tamanho do dataset de treino (16228 linhas e 7 colunas) e do dataset de teste (4057 linhas e 7 colunas). Para fazer essa divisão, foi utilizada a função train_test_split do sklearn.model_selection, conforme abaixo:
+
+```python
+x_data_train, x_data_test, y_data_train, y_data_test = train_test_split(x_data, y_data, test_size=test_size,
+    random_state=random_state_param, stratify=y_data)
+```
+No caso, os dados de x_data e y_data são as features e o target de data_filtered.parquet, respectivamente. O random_state e o test_size estão configurados em conf/base/parameters.yml, e são respectivamente 3128 e 0,2.
+A imagem a seguir, com métricas do MLflow, mostra como ficou a proporção treino teste:
+ ![Proporção treino teste](docs/mlflow/mlflow-proporcao-treino_teste.png)
+
+Após a separação em treino e teste, os datasets de treino e teste foram armazenados em data/05_model_input como base_train.parquet e base_test.parquet, respectivamente.
+
+A escolha de treino e teste precisa ser bem feita e pode afetar no resultado final na medida em que, se o dataset de treino não é representativo dos dados de inferência (teste ou produção), o modelo treinado pode ficar bem ajustado a um tipo específico de dado, mas não a outro. Isso pode facilitar a ocorrência do problema de overfitting, que é quando meu modelo se ajusta bem e performa bem para os dados de treino, e performa mal para os dados de teste, por deixar o modelo enviesado para um tipo específico de dado. Ou ainda, se eu tenho predominância de um tipo de target para treino e predominância de outro para teste, o meu resultado de acurácia pode estar enviesado para um target específico.
+
+ Dessa forma, algumas estratégias para evitar esse problema são: **a divisão entre treino e teste de forma estratificada** - dessa forma, a proporção entre os targets permanecerá entre os grupos de treino e teste - ; e ainda, **a validação cruzada** durante a fase de treinamento - por treinar e validar em diferentes configurações, a validação cruzada ajuda a reduzir o impacto de eventuais divisões enviesadas.
+
+
+
+
+
 
 
 ## Arquivos e Diretórios Importantes
 
 
-- `mlruns/`: Diretório para armazenar artefatos do MLflow
+- `data/`: Diretório para armazenar artefatos do projeto
+- `mlruns/`: Diretório para armazenar métricas, parâmetros, modelos e artefatos que forem rastreados pelo MLflow
 - `conf/local/mlflow.yml`: Configuração do MLflow 
 
 (...)
 
+--------
 
-## Executando de forma local 
+## Executando o projeto de forma local 
 
-### Pré-requisitos
+Para rodar este projeto, foi criado um ambiente com Python na versão 3.11. Recomenda-se utilizar um ambiente com essa mesma configuração.
+
+#### Pré-requisitos do ambiente
 
 - Python 3.11
 - pip (gerenciador de pacotes Python)
 
-### 1. Configuração do ambiente
+#### 1. Configuração do ambiente
 
 1. Crie um ambiente virtual com Python 3.11 (recomendado):
 Exemplo:
@@ -143,7 +178,7 @@ conda activate PD_env_1 # sempre que for necessário entrar na env para executar
 pip install -r requirements.txt
 ```
 
-### 2. Visualizando experimentos com MLflow
+#### 2. Visualizando experimentos com MLflow
 
 Para iniciar o servidor MLflow localmente, o qual será responsável por rastrear modelos e algumas métricas e parâmetros no projeto:
 
@@ -152,7 +187,7 @@ Para iniciar o servidor MLflow localmente, o qual será responsável por rastrea
 mlflow server --host 0.0.0.0 --port 5000
 ```
 
-### 3. Executando o projeto
+#### 3. Executando o projeto
 
 Após iniciar o servidor MLflow localmente, para executar as pipelines Kedro (pré-processamentos, gerar as métricas, modelos e resultados, e inferências com os dados de produção), execute o projeto com:
 
@@ -161,16 +196,17 @@ Após iniciar o servidor MLflow localmente, para executar as pipelines Kedro (pr
 kedro run
 ```
 
-### 4. Servindo o modelo gerado com MLflow
+#### 4. Servindo o modelo gerado com MLflow
 
 É possível subir o melhor modelo encontrado com o seguinte comando:
+**Obs.: suba na porta 5002, pois é a porta chamada no Streamlit para a inferência!**
 
 ```bash
 # dentro da env, no diretório kobe/
 MLFLOW_TRACKING_URI=file://$PWD/mlruns mlflow models serve -m models:/best_model/latest --env-manager=local --port 5002
 ```
 
-### 5. Monitorando API com Streamlit (fazendo inferências)
+#### 5. Monitorando API com Streamlit (fazendo inferências)
 
 **Após servir o modelo com MLflow**, é possível monitorá-lo via Streamlot com o seguinte comando:
 
@@ -180,7 +216,7 @@ cd streamlit
 streamlit run main_API.py 
 ```
 
-### JupyterLab
+#### JupyterLab
 
 O projeto inclui ainda suporte para JupyterLab. Para usar o JupyterLab:
 

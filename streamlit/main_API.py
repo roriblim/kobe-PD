@@ -78,46 +78,27 @@ if aba == "Predição":
     ### Essa aplicação permite ao usuário prever se o Kobe irá acertar uma cesta ou não, utilizando o modelo de <span style="color:red">Regressão Logística</span> por meio do consumo à <span style="color:red">API</span>.            
     """, unsafe_allow_html=True)
 
-    opcoes_shot = ['Jump Shot', 'Layup', 'Dunk', 'Tip Shot', 'Hook Shot', 'Bank Shot']
-    opcoes_type = ['2PT Field Goal','3PT Field Goal']
-    opcoes_area = ['Right Side(R)', 'Left Side Center(LC)', 'Left Side(L)', 'Right Side Center(RC)', 'Center(C)','Back Court(BC)']
-    opcoes_range = ['16-24 ft.', '8-16 ft.', 'Less Than 8 ft.', '24+ ft.','Back Court Shot']
-
     col1, col2, col3 = st.columns(3)
 
     with col1:
         lat = st.number_input('lat', value=33.81)
-        loc_x = st.number_input('loc_x', value=-94)
-        minutes_remaining = st.number_input('minutes_remaining', value=1)
-        shot_type = st.selectbox('shot_type', opcoes_type)
-
-    with col2:
         lon = st.number_input('lon', value=-118.3638)
-        loc_y = st.number_input('loc_y', value=238)
+
+    with col2: 
+        minutes_remaining = st.number_input('minutes_remaining', value=1)
         period = st.number_input('period', value=2)
-        shot_zone_area = st.selectbox('shot_zone_area', opcoes_area)
 
     with col3:
-        combined_shot_type = st.selectbox('combined_shot_type', opcoes_shot)
-        seconds_remaining = st.number_input('seconds_remaining', value=8)
         playoffs = int(st.checkbox('playoffs'))
         shot_distance = st.number_input('shot_distance', value=20)
-        shot_zone_range = st.selectbox('shot_zone_range', opcoes_range)
 
     input_data = {
         'lat': lat,
-        'combined_shot_type': combined_shot_type,
         'lon': lon,
-        'loc_x': loc_x,
-        'loc_y': loc_y,
         'minutes_remaining': minutes_remaining,
         'period': period,
         'playoffs': playoffs,
-        'seconds_remaining': seconds_remaining,
-        'shot_distance': shot_distance,
-        'shot_type': shot_type,
-        'shot_zone_area': shot_zone_area,
-        'shot_zone_range': shot_zone_range
+        'shot_distance': shot_distance
     }
 
     colunas_necessarias = ['lat', 'lon', 'minutes_remaining', 'period', 'playoffs','shot_distance']

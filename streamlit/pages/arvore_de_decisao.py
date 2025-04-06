@@ -28,24 +28,18 @@ opcoes_range = ['16-24 ft.', '8-16 ft.', 'Less Than 8 ft.', '24+ ft.', 'Back Cou
 
 col1, col2, col3 = st.columns(3)
 
+
 with col1:
     lat = st.number_input('lat', value=33.8183)
-    loc_x = st.number_input('loc_x', value=-117)
-    minutes_remaining = st.number_input('minutes_remaining', value=8)
-    shot_type = st.selectbox('shot_type', opcoes_shot_type)
-
-with col2:
     lon = st.number_input('lon', value=-118.3868)
-    loc_y = st.number_input('loc_y', value=226)
+
+with col2: 
+    minutes_remaining = st.number_input('minutes_remaining', value=8)
     period = st.number_input('period', value=2)
-    shot_zone_area = st.selectbox('shot_zone_area', opcoes_area)
 
 with col3:
-    combined_shot_type = st.selectbox('combined_shot_type', opcoes_combined)
-    seconds_remaining = st.number_input('seconds_remaining', value=50)
     playoffs = int(st.checkbox('playoffs'))
     shot_distance = st.number_input('shot_distance', value=25)
-    shot_zone_range = st.selectbox('shot_zone_range', opcoes_range)
 
 input_data = {
     'lat': lat,
@@ -53,14 +47,7 @@ input_data = {
     'minutes_remaining': minutes_remaining,
     'period': period,
     'playoffs': playoffs,
-    'shot_distance': shot_distance,
-    'combined_shot_type': combined_shot_type,
-    'loc_x': loc_x,
-    'loc_y': loc_y,
-    'seconds_remaining': seconds_remaining,
-    'shot_type': shot_type,
-    'shot_zone_area': shot_zone_area,
-    'shot_zone_range': shot_zone_range
+    'shot_distance': shot_distance
 }
 
 colunas_necessarias = ['lat', 'lon', 'minutes_remaining', 'period', 'playoffs', 'shot_distance']
