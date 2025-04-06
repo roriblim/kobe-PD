@@ -6,6 +6,76 @@
 Link para o projeto no Github: 
 https://github.com/roriblim/kobe-PD
 
+Para rodar este projeto, foi criado um ambiente com Python na versão 3.11. Recomenda-se utilizar um ambiente com essa mesma configuração.
+
+#### Pré-requisitos do ambiente
+
+- Python 3.11
+- pip (gerenciador de pacotes Python)
+
+#### 1.1. Configuração do ambiente
+
+1. Crie um ambiente virtual com Python 3.11 (recomendado):
+Exemplo:
+```bash
+conda create --name PD_env_1 python=3.11 --no-default-packages -y
+conda activate PD_env_1 # sempre que for necessário entrar na env para executar comandos no projeto!
+```
+
+2. Instale as dependências:
+
+```bash
+# dentro da env, no diretório kobe/
+pip install -r requirements.txt
+```
+
+#### 1.2. Visualizando experimentos com MLflow
+
+Para iniciar o servidor MLflow localmente, o qual será responsável por rastrear modelos e algumas métricas e parâmetros no projeto:
+
+```bash
+# dentro da env, no diretório kobe/
+mlflow server --host 0.0.0.0 --port 5000
+```
+
+#### 1.3. Executando o projeto
+
+Após iniciar o servidor MLflow localmente, para executar as pipelines Kedro (pré-processamentos, gerar as métricas, modelos e resultados, e inferências com os dados de produção), execute o projeto com:
+
+```bash
+# dentro da env, no diretório kobe/
+kedro run
+```
+
+#### 1.4. Servindo o modelo gerado com MLflow
+
+É possível subir o melhor modelo encontrado com o seguinte comando:
+**Obs.: suba na porta 5002, pois é a porta chamada no Streamlit para a inferência!**
+
+```bash
+# dentro da env, no diretório kobe/
+MLFLOW_TRACKING_URI=file://$PWD/mlruns mlflow models serve -m models:/best_model/latest --env-manager=local --port 5002
+```
+
+#### 1.5. Monitorando API com Streamlit (fazendo inferências)
+
+**Após servir o modelo com MLflow**, é possível monitorá-lo via Streamlot com o seguinte comando:
+
+```bash
+# dentro da env, no diretório kobe/
+cd streamlit
+streamlit run main_API.py 
+```
+
+#### JupyterLab
+
+O projeto inclui ainda suporte para JupyterLab. Para usar o JupyterLab:
+
+```bash
+# dentro da env, no diretório kobe/
+kedro jupyter lab --no-browser
+```
+
 ## Item 2.
 #### Diagramas com as etapas do projeto:
 Este projeto segue a estrutura Kedro, e também é rastreado pelo MLflow. Portanto, os artefatos são armazenados no diretório data/, e os parâmetros, métricas e artefatos monitorados pelo MLflow são armazenados em mlruns/.
@@ -83,13 +153,17 @@ Além disso, após a execução do projeto, o melhor modelo foi servido em uma A
    --------------
  - Em data/07_model_output:
    - **DT_data_prod_y_pred.csv**: resultado do predict (se acertou a cesta ou não) dos dados de produção pelo modelo de Árvore de Decisão (DT_model.pkl) em formato csv;
+   - **DT_data_prod_y_pred.parquet**: resultado do predict (se acertou a cesta ou não) dos dados de produção pelo modelo de Árvore de Decisão (DT_model.pkl) em formato parquet;
    - **DT_data_prod_y_proba.csv**: resultado do predict_proba (probabilidades de acerto) dos dados de produção pelo modelo de Árvore de Decisão (DT_model.pkl) em formato csv;
+   - **DT_data_prod_y_proba.parquet**: resultado do predict_proba (probabilidades de acerto) dos dados de produção pelo modelo de Árvore de Decisão (DT_model.pkl) em formato parquet;
    - **DT_test_predictions.csv**: resultado do predict (se acertou a cesta ou não) dos dados de teste pelo modelo de Árvore de Decisão (DT_model.pkl) em formato csv;
    - **DT_test_predictions.parquet**: resultado do predict (se acertou a cesta ou não) dos dados de teste pelo modelo de Árvore de Decisão (DT_model.pkl) em formato parquet;
    - **DT_test_probs.csv**: resultado do predict_proba (probabilidades de acerto) dos dados de teste pelo modelo de Árvore de Decisão (DT_model.pkl) em formato csv;
    - **inferencia_streamlit.csv**: log dos dados enviados para a API que serve o modelo; contém um histórico dos dados contidos nas requisições feitas, útil para monitoramento dos dados de produção.
    - **RL_data_prod_y_pred.csv**: resultado do predict (se acertou a cesta ou não) dos dados de produção pelo modelo de Regressão Logística (RL_model.pkl) em formato csv;
+   - **RL_data_prod_y_pred.parquet**: resultado do predict (se acertou a cesta ou não) dos dados de produção pelo modelo de Regressão Logística (RL_model.pkl) em formato parquet;
    - **RL_data_prod_y_proba.csv**: resultado do predict_proba (probabilidades de acerto) dos dados de produção pelo modelo de Regressão Logística (RL_model.pkl) em formato csv;
+   - **RL_data_prod_y_proba.parquet**: resultado do predict_proba (probabilidades de acerto) dos dados de produção pelo modelo de Regressão Logística (RL_model.pkl) em formato parquet;
    - **RL_test_predictions.csv**: resultado do predict (se acertou a cesta ou não) dos dados de teste pelo modelo de Regressão Logística (RL_model.pkl) em formato csv;
    - **RL_test_predictions.parquet**: resultado do predict (se acertou a cesta ou não) dos dados de teste pelo modelo de Regressão Logística (RL_model.pkl) em formato parquet;
    - **RL_test_probs.csv**: resultado do predict_proba (probabilidades de acerto) dos dados de teste pelo modelo de Regressão Logística (RL_model.pkl) em formato csv;
@@ -177,7 +251,26 @@ Se quisermos analisar a importância observada pelos modelos para cada feature n
 
 Podemos ainda verificar as curvas roc de ambos os modelos para os dados de teste, as quais se encontram salvas nos artefatos em data/08_reporting, com os nomes de roc_curve_test_DT.png e roc_curve_test_RL.png
 
+## Item 7.
+#### Pipeline de aplicação
 
+A pipeline de treinamento do projeto se chama aplicacao_prod.
+
+A pipeline de aplicação, que é a última pipeline do projeto, é responsável por carregar os dados de produção (que estão em data/01_raw/dataset_kobe_prod.parquet), processá-los e realizar a inferência de seus dados por meio dos modelos obtidos na pipeline anterior, de treinamento.
+
+
+Após subir o MLflow e rodar o projeto com kedro run, o comando utilizado para servir o modelo, como explicado no item 1.4 acima, foi:
+```bash
+# dentro da env, no diretório kobe/
+MLFLOW_TRACKING_URI=file://$PWD/mlruns mlflow models serve -m models:/best_model/latest --env-manager=local --port 5002
+```
+
+
+
+Registre o modelo de classificação e o sirva através do MLFlow (ou como uma API local, ou embarcando o modelo na aplicação). Desenvolva um pipeline de aplicação (aplicacao.py) para carregar a base de produção (/data/raw/dataset_kobe_prod.parquet) e aplicar o modelo. Nomeie a rodada (run) do mlflow como “PipelineAplicacao” e publique, tanto uma tabela com os resultados obtidos (artefato como .parquet), quanto log as métricas do novo log loss e f1_score do modelo.
+O modelo é aderente a essa nova base? O que mudou entre uma base e outra? Justifique.
+Descreva como podemos monitorar a saúde do modelo no cenário com e sem a disponibilidade da variável resposta para o modelo em operação.
+Descreva as estratégias reativa e preditiva de retreinamento para o modelo em operação.
 
 ## Arquivos e Diretórios Importantes
 
@@ -190,77 +283,7 @@ Podemos ainda verificar as curvas roc de ambos os modelos para os dados de teste
 
 --------
 
-## Executando o projeto de forma local 
 
-Para rodar este projeto, foi criado um ambiente com Python na versão 3.11. Recomenda-se utilizar um ambiente com essa mesma configuração.
-
-#### Pré-requisitos do ambiente
-
-- Python 3.11
-- pip (gerenciador de pacotes Python)
-
-#### 1. Configuração do ambiente
-
-1. Crie um ambiente virtual com Python 3.11 (recomendado):
-Exemplo:
-```bash
-conda create --name PD_env_1 python=3.11 --no-default-packages -y
-conda activate PD_env_1 # sempre que for necessário entrar na env para executar comandos no projeto!
-```
-
-2. Instale as dependências:
-
-```bash
-# dentro da env, no diretório kobe/
-pip install -r requirements.txt
-```
-
-#### 2. Visualizando experimentos com MLflow
-
-Para iniciar o servidor MLflow localmente, o qual será responsável por rastrear modelos e algumas métricas e parâmetros no projeto:
-
-```bash
-# dentro da env, no diretório kobe/
-mlflow server --host 0.0.0.0 --port 5000
-```
-
-#### 3. Executando o projeto
-
-Após iniciar o servidor MLflow localmente, para executar as pipelines Kedro (pré-processamentos, gerar as métricas, modelos e resultados, e inferências com os dados de produção), execute o projeto com:
-
-```bash
-# dentro da env, no diretório kobe/
-kedro run
-```
-
-#### 4. Servindo o modelo gerado com MLflow
-
-É possível subir o melhor modelo encontrado com o seguinte comando:
-**Obs.: suba na porta 5002, pois é a porta chamada no Streamlit para a inferência!**
-
-```bash
-# dentro da env, no diretório kobe/
-MLFLOW_TRACKING_URI=file://$PWD/mlruns mlflow models serve -m models:/best_model/latest --env-manager=local --port 5002
-```
-
-#### 5. Monitorando API com Streamlit (fazendo inferências)
-
-**Após servir o modelo com MLflow**, é possível monitorá-lo via Streamlot com o seguinte comando:
-
-```bash
-# dentro da env, no diretório kobe/
-cd streamlit
-streamlit run main_API.py 
-```
-
-#### JupyterLab
-
-O projeto inclui ainda suporte para JupyterLab. Para usar o JupyterLab:
-
-```bash
-# dentro da env, no diretório kobe/
-kedro jupyter lab --no-browser
-```
 
 
 

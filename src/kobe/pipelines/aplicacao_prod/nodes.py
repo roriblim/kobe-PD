@@ -34,9 +34,18 @@ def predict_DT(data_x, data_y_actual, model_DT):
     data_y_proba = model.predict_proba(data_x)
     data_y_pred = model.predict(data_x)
 
+
     metrics_DT = get_metrics_prod(data_y_proba, data_y_pred, data_y_actual, "DT")
 
-    return pd.DataFrame(data_y_proba), pd.DataFrame(data_y_pred), metrics_DT
+    data_y_pred_df = pd.DataFrame(data_y_pred)
+    data_y_proba_df = pd.DataFrame(data_y_proba)
+
+    data_y_pred_df.to_parquet("data/07_model_output/DT_data_prod_y_pred.parquet", index=False)
+    mlflow.log_artifact("data/07_model_output/DT_data_prod_y_pred.parquet")
+    data_y_proba_df.to_parquet("data/07_model_output/DT_data_prod_y_proba.parquet", index=False)
+    mlflow.log_artifact("data/07_model_output/DT_data_prod_y_proba.parquet")
+
+    return data_y_proba_df, data_y_pred_df, metrics_DT
 
 def predict_RL(data_x, data_y_actual, model_RL):
 
@@ -46,7 +55,15 @@ def predict_RL(data_x, data_y_actual, model_RL):
 
     metrics_RL = get_metrics_prod(data_y_proba, data_y_pred, data_y_actual, "RL")
 
-    return pd.DataFrame(data_y_proba), pd.DataFrame(data_y_pred), metrics_RL
+    data_y_pred_df = pd.DataFrame(data_y_pred)
+    data_y_proba_df = pd.DataFrame(data_y_proba)
+
+    data_y_pred_df.to_parquet("data/07_model_output/RL_data_prod_y_pred.parquet", index=False)
+    mlflow.log_artifact("data/07_model_output/RL_data_prod_y_pred.parquet")
+    data_y_proba_df.to_parquet("data/07_model_output/RL_data_prod_y_proba.parquet", index=False)
+    mlflow.log_artifact("data/07_model_output/RL_data_prod_y_proba.parquet")
+
+    return data_y_proba_df, data_y_pred_df, metrics_RL
 
 def get_metrics_prod(data_y_proba, data_y_pred, data_y_actual, model_name):
 
