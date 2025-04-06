@@ -112,12 +112,13 @@ Além disso, após a execução do projeto, o melhor modelo foi servido em uma A
 ## Item 5.
 #### Pipeline de processamento de dados
 
-A pipeline de processamento de dados se chama preparacao_dado.
+A pipeline de processamento de dados se chama preparacao_dados.
 
 **a**. Os dados iniciais estão armazenados em data/01_raw, com o nome de dataset_kobe_dev.parquet e dataset_kobe_prod.parquet.
 **b**. As linhas duplicadas foram removidas, as linhas com dados faltantes foram desconsideradas, conforme solicitado, e foram consideradas apenas as colunas lat, lon, minutes remaining, period, playoffs, shot_distance, conforme solicitado. Os dados resultantes estão em data/03_primary, no arquivo primary_dev.csv.
  Em seguida, as colunas lat e lon foram transformadas a fim de extrair dados mais úteis para a predição: a partir delas foram obtidas as colunas lat_quadra e lon_quadra. Os dados resultantes estão em data/04_feature, no arquivo data_filtered.parquet.
  A dimensão resultante do data_filtered.parquet é de 20285 linhas e 7 colunas, como é possível verificar nas métricas do mlflow:
+
  ![Tamanho dos dados de dev antes da entrada no modelo](docs/mlflow/mlflow-tamanho-data-dev-pre-modelo.png)
 
 Na última etapa do pré-processamento, os dados foram separados em treino (80%) e teste (20%), de forma aleatória e estratificada. Pela imagem acima também é possível ver o tamanho do dataset de treino (16228 linhas e 7 colunas) e do dataset de teste (4057 linhas e 7 colunas). Para fazer essa divisão, foi utilizada a função train_test_split do sklearn.model_selection, conforme abaixo:
@@ -128,6 +129,7 @@ x_data_train, x_data_test, y_data_train, y_data_test = train_test_split(x_data, 
 ```
 No caso, os dados de x_data e y_data são as features e o target de data_filtered.parquet, respectivamente. O random_state e o test_size estão configurados em conf/base/parameters.yml, e são respectivamente 3128 e 0,2.
 A imagem a seguir, com métricas do MLflow, mostra como ficou a proporção treino teste:
+
  ![Proporção treino teste](docs/mlflow/mlflow-proporcao-treino_teste.png)
 
 Após a separação em treino e teste, os datasets de treino e teste foram armazenados em data/05_model_input como base_train.parquet e base_test.parquet, respectivamente.
@@ -136,9 +138,43 @@ A escolha de treino e teste precisa ser bem feita e pode afetar no resultado fin
 
  Dessa forma, algumas estratégias para evitar esse problema são: **a divisão entre treino e teste de forma estratificada** - dessa forma, a proporção entre os targets permanecerá entre os grupos de treino e teste - ; e ainda, **a validação cruzada** durante a fase de treinamento - por treinar e validar em diferentes configurações, a validação cruzada ajuda a reduzir o impacto de eventuais divisões enviesadas.
 
+## Item 6.
+#### Pipeline de treinamento
+
+A pipeline de treinamento do projeto se chama treinamento.
+
+A partir dos dados separados para treinamento na pipeline de preparação dos dados, foi treinado um modelo de regressão logística (RL) e um modelo de árvore de decisão (DT) do sklearn usando a biblioteca pyCaret. Tais modelos estão salvos como artefatos do projeto(em data/06_models), e são monitorados pelo MLflow e registrados com os nomes de RL_model.pkl e DT_model.pkl, respectivamente. 
+
+Além disso, os modelos foram comparados entre si e foi escolhido o melhor modelo dentro da pipeline de treinamento, no nó de nome compare_models_node, que chama a função compare_models. Para a escolha do melhor modelo, foi utilizada a medida da área sob a curva ROC, ou **auc roc** (o modelo com a maior medida de **auc roc** foi considerado com melhor performance geral). Esse melhor modelo foi salvo como artefato do projeto (em data/06_models), com o nome de best_model.pkl, e também é rastreado pelo MLflow. 
+
+Por fim, uma versão desse modelo foi registrada no MLflow para ter como saída o predict_proba, a fim de que a API com esse modelo, ao ser chamada, retorne as probabilidades de acerto ou de erro da cesta.
+
+As imagems a seguir mostram os modelos rastreados no MLflow, bem como os melhores hiperparâmetros encontrados para cada:
+
+ ![Modelos no MLflow](docs/mlflow/mlflow-modelos.png)
+
+Hiperparâmetros encontrados para a árvore de decisão após o tunning:
+
+ ![Hiperparâmetros DT](docs/mlflow/mlflow_hiperparametros_DT.png)
+
+Hiperparâmetros encontrados para a regressão logística após o tunning:
+
+ ![Hiperparâmetros RL](docs/mlflow/mlflow_hiperparametros_RL.png)
+
+As métricas de log_loss, F1_score com os dados de teste para os modelos de árvore de decisão e de regressão logística foram logadas no MLflow:
+
+ ![Métricas de teste DT](docs/mlflow/mlflow_dt_test_metrics.png)
+
+ ![Métricas de teste RL](docs/mlflow/mlflow_rl_test_metrics.png)
+
+As métricas mais completas de teste para os modelos de árvore de decisão e de regressão logística se encontram salvas nos artefatos (em data/08_reporting) com os nomes de DT_test_metrics.csv e RL_test_metrics.csv, respectivamente.
+
+É possível verificar que nenhum dos dois modelos teve uma boa performance, mas a regressão logística performou um pouco melhor (F1 Score de 0.54 contra 0.52 da árvore de decisão; e roc auc de 0.59, contra aproximadamente 0.58 da árvore de decisão). Assim, esse modelo demonstrou ser o melhor entre os dois dentro deste projeto. 
+
+Se quisermos analisar a importância observada pelos modelos para cada feature na previsão de acerto ou erro, dentre as features utilizadas, podemos consultar os artefatos salvos em data/08_reporting, com os nomes de RL_feature_importance.png e DT_feature_importance.png. Por elas, podemos verificar que, para o modelo de RL encontrado, a lat_quadra (feature originada da latitude) demonstrou ser o melhor indicador de acerto ou erro, enquanto na DT, as features de shot_distance, lon_quadra e lat_quadra demonstraram ser os melhores indicadores. No entanto, de modo geral, a performance desses dois modelos não esteve muito boa, como vimos nas métricas acima. As possíveis explicações para essa performance são que as features utilizadas neste projeto não são bons indicadores de acerto ou erro de cesta. Uma alternativa no caso real, se quiséssemos melhorar a performance do projeto, seria testar a utilização de outras features do dataset original.
 
 
-
+Podemos ainda verificar as curvas roc de ambos os modelos para os dados de teste, as quais se encontram salvas nos artefatos em data/08_reporting, com os nomes de roc_curve_test_DT.png e roc_curve_test_RL.png
 
 
 
