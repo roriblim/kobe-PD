@@ -21,8 +21,8 @@ def prepare_data(raw_dev):
     mlflow.log_metric("num_linhas_raw_dev", len(raw_dev))
     mlflow.log_metric("num_linhas_primary_dev", len(data))
 
-    data.to_csv("primary_dev.csv", index=False)
-    mlflow.log_artifact("primary_dev.csv")
+    data.to_csv("data/03_primary/primary_dev.csv", index=False)
+    mlflow.log_artifact("data/03_primary/primary_dev.csv")
 
     return data
 
@@ -33,8 +33,8 @@ def feature_engineering(data):
     data['lon_quadra'] = data['lon'] + 118.2698
     data = data.drop(columns=["lat", "lon"])
 
-    data.to_csv("data_filtered_dev.csv", index=False)
-    mlflow.log_artifact("data_filtered_dev.csv")
+    data.to_csv("data/04_feature/data_filtered_dev.csv", index=False)
+    mlflow.log_artifact("data/04_feature/data_filtered_dev.csv")
    
     return data
 
@@ -71,10 +71,10 @@ def separacao_treino_teste(data, random_state_param, test_size):
     mlflow.log_metric("proporcao_positivos_treino", data_train['shot_made_flag'].mean())
     mlflow.log_metric("proporcao_positivos_teste", data_test['shot_made_flag'].mean())
 
-    data_train.to_csv("base_train.csv", index=False)
-    mlflow.log_artifact("base_train.csv")
-    data_test.to_csv("base_test.csv", index=False)
-    mlflow.log_artifact("base_test.csv")
+    data_train.to_csv("data/05_model_input/base_train.csv", index=False)
+    mlflow.log_artifact("data/05_model_input/base_train.csv")
+    data_test.to_csv("data/05_model_input/base_test.csv", index=False)
+    mlflow.log_artifact("data/05_model_input/base_test.csv")
 
     return data_train, data_test, data_train, data_test
 

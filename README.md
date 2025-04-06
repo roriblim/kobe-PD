@@ -66,6 +66,7 @@ Além disso, após a execução do projeto, o melhor modelo foi servido em uma A
    --------------
  - Em data/04_feature:
    - **data_filtered.parquet**: dataset com os dados de desenvolvimento após feature engineering (transformação de latitude e longitude em dados com maior informação para o modelo - posição na quadra - representados por lat_quadra e lon_quadra) em formato parquet;
+   - **data_filtered_dev.csv**: dataset com os dados de desenvolvimento após feature engineering (transformação de latitude e longitude em dados com maior informação para o modelo - posição na quadra - representados por lat_quadra e lon_quadra) em formato csv;
    --------------
  - Em data/05_model_input:
    - **base_prod_x.csv**: dataset com os dados das features de produção tratados e prontos para entrada no modelo, em formato csv;
