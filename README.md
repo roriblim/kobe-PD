@@ -205,7 +205,7 @@ x_data_train, x_data_test, y_data_train, y_data_test = train_test_split(x_data, 
 No caso, os dados de x_data e y_data são as features e o target de data_filtered.parquet, respectivamente. O random_state e o test_size estão configurados em conf/base/parameters.yml, e são respectivamente 3128 e 0,2.
 A imagem a seguir, com métricas do MLflow, mostra como ficou a proporção treino teste:
 
- ![Proporção treino teste](docs/mlflow/mlflow-proporcao-treino_teste.png)
+ ![Proporção treino teste](docs/mlflow/mlflow-proporcao-treino-teste.png)
 
 Após a separação em treino e teste, os datasets de treino e teste foram armazenados em data/05_model_input como base_train.parquet e base_test.parquet, respectivamente.
 
@@ -226,7 +226,7 @@ Por fim, uma versão desse modelo foi registrada no MLflow para ter como saída 
 
 As imagems a seguir mostram os modelos rastreados no MLflow, bem como os melhores hiperparâmetros encontrados para cada:
 
- ![Modelos no MLflow](docs/mlflow/mlflow-modelos.png)
+ ![Modelos no MLflow](docs/mlflow/mlflow_modelos.png)
 
 Hiperparâmetros encontrados para a árvore de decisão após o tunning:
 
@@ -246,7 +246,15 @@ As métricas mais completas de teste para os modelos de árvore de decisão e de
 
 É possível verificar que nenhum dos dois modelos teve uma boa performance, mas a regressão logística performou um pouco melhor (F1 Score de 0.54 contra 0.52 da árvore de decisão; e roc auc de 0.59, contra aproximadamente 0.58 da árvore de decisão). Assim, esse modelo demonstrou ser o melhor entre os dois dentro deste projeto. 
 
-Se quisermos analisar a importância observada pelos modelos para cada feature na previsão de acerto ou erro, dentre as features utilizadas, podemos consultar os artefatos salvos em data/08_reporting, com os nomes de RL_feature_importance.png e DT_feature_importance.png. Por elas, podemos verificar que, para o modelo de RL encontrado, a lat_quadra (feature originada da latitude) demonstrou ser o melhor indicador de acerto ou erro, enquanto na DT, as features de shot_distance, lon_quadra e lat_quadra demonstraram ser os melhores indicadores. No entanto, de modo geral, a performance desses dois modelos não esteve muito boa, como vimos nas métricas acima. As possíveis explicações para essa performance são que as features utilizadas neste projeto não são bons indicadores de acerto ou erro de cesta. Uma alternativa no caso real, se quiséssemos melhorar a performance do projeto, seria testar a utilização de outras features do dataset original.
+Se quisermos analisar a importância observada pelos modelos para cada feature na previsão de acerto ou erro, dentre as features utilizadas, podemos consultar os artefatos salvos em data/08_reporting, com os nomes de RL_feature_importance.png e DT_feature_importance.png. Por elas, podemos verificar que, para o modelo de RL encontrado, a lat_quadra (feature originada da latitude) demonstrou ser o melhor indicador de acerto ou erro, enquanto na DT, as features de shot_distance, lon_quadra e lat_quadra demonstraram ser os melhores indicadores. 
+
+Importância das features no modelo de árvore de decisão:
+![feature_importance_DT](data/08_reporting/DT_feature_importance.png)
+
+Importância das features no modelo de regressão logística:
+![feature_importance_RL](data/08_reporting/RL_feature_importance.png)
+
+No entanto, de modo geral, a performance desses dois modelos não esteve muito boa, como vimos nas métricas acima. As possíveis explicações para essa performance são que as features utilizadas neste projeto não são bons indicadores de acerto ou erro de cesta. Uma alternativa no caso real, se quiséssemos melhorar a performance do projeto, seria testar a utilização de outras features do dataset original.
 
 
 Podemos ainda verificar as curvas roc de ambos os modelos para os dados de teste, as quais se encontram salvas nos artefatos em data/08_reporting, com os nomes de roc_curve_test_DT.png e roc_curve_test_RL.png
@@ -256,21 +264,46 @@ Podemos ainda verificar as curvas roc de ambos os modelos para os dados de teste
 
 A pipeline de treinamento do projeto se chama aplicacao_prod.
 
-A pipeline de aplicação, que é a última pipeline do projeto, é responsável por carregar os dados de produção (que estão em data/01_raw/dataset_kobe_prod.parquet), processá-los e realizar a inferência de seus dados por meio dos modelos obtidos na pipeline anterior, de treinamento.
+A pipeline de aplicação, que é a última pipeline do projeto, é responsável por carregar os dados de produção (que estão em data/01_raw/dataset_kobe_prod.parquet), pré-processá-los e realizar a inferência de seus dados por meio dos modelos obtidos na pipeline anterior, de treinamento.
 
+Os resultados obtidos (tanto a previsão de acerto ou erro quanto as probabilidades de cada) estão salvos em data/07_model_output, e também estão logados no MLflow, como DT_data_prod_y_proba.parquet, DT_data_prod_y_pred.parquet, RL_data_prod_y_proba.parquet e RL_data_prod_y_pred.parquet.
 
-Após subir o MLflow e rodar o projeto com kedro run, o comando utilizado para servir o modelo, como explicado no item 1.4 acima, foi:
+Os resultados também estão disponíveis como csv em data/07_model_output.
+
+![Resultados_prod](docs/mlflow/mlflow_outputs_prod.png)
+
+As métricas da inferência estão salvas em data/08_reporting como DT_prod_metrics.csv e RL_prod_metrics.csv. O F1 Score, o log loss e o roc auc (área sob a curva ROC) de produção também estão logados no MLflow, tanto para a árvore de decisão quanto para a regressão logística:
+
+![Métricas_prod](docs/mlflow/mlflow_dt_prod_metrics.png)
+
+![Métricas_prod](docs/mlflow/mlflow_rl_prod_metrics.png)
+
+As curvas roc da inferência de produção também podem ser encontradas em data/08_reporting, como roc_curve_prod_DT.png e roc_curve_prod_RL.png.
+
+Dos resultados obtidos, é possível perceber que a aderência dos modelos treinados a essa nova base foi **muito baixa** (F1 Score de 0,35 para a árvore de decisão, e F1 Score de 0 para a regressão logística). 
+No caso da regressão logística, o F1 Score foi ainda mais baixo, e quase todos os predicts da sua inferência foram iguais a 0. 
+
+Distribuição das features de treino:
+![distribuição-features-treino](data/08_reporting/distribuicao_features_train.png)
+
+Distribuição das features de produção:
+![distribuição-features-prod](data/08_reporting/distribuicao_features_prod.png)
+
+Observando as distribuições acima, é possível ver que há uma grande diferença entre a lat_quadra dos dados de produção (com boa parte abaixo de -0.15), e o lat_quadra dos dados de desenvolvimento (com boa parte acima desse valor). Assim, pode-se perceber que os dados de produção são diferentes dos utilizados para treino dos modelos, e como consequência a adesão dos modelos a esses dados foi muito baixa.
+Analisando mais cuidadosamente, podemos perceber que esse resultado ainda pior da regressão logística está de acordo com a importância das features percebida pelo modelo de regressão logística, conforme já mencionado no item 6 acima. Isso porque o modelo de regressão logística percebeu grande importância na feature de lat_quadra. Todavia, como já vimos, se analisarmos a distribuição das features dos dados de produção , podemos perceber que a latitude, que dá origem à lat_quadra, está bem diferente nos dados de produção em relação aos dados de desenvolvimento.
+
+Por fim, após subir o MLflow e rodar o projeto com kedro run, o comando utilizado para servir o modelo, como explicado no item 1.4 acima, foi:
 ```bash
 # dentro da env, no diretório kobe/
 MLFLOW_TRACKING_URI=file://$PWD/mlruns mlflow models serve -m models:/best_model/latest --env-manager=local --port 5002
 ```
 
+Neste projeto, conseguimos perceber então que uma forma de monitorar a saúde do modelo no cenário em que temos disponível a variável de resposta seria por meio do cálculo das métricas (F1 Score, Log loss, roc auc, recall, precisão, entre outras), e de sua comparação com as métricas obtidas com os dados de teste à época em que foi realizado o treinamento do modelo. Quando temos o target real, o cálculo dessas métricas se torna possível, e a análise da qualidade e da adesão do modelo aos dados de produção se torna mais facilitada.
+Isso pode ser feito por meio do log dos dados de entrada no modelo para inferência, bem como de seu target esperado, e posterior cálculo das métricas a partir dos dados registrados.
 
+Todavia, se não temos essas variáveis de resposta, uma alternativa, também explorada neste projeto, conforme demonstrado acima, é a análise das features, e se elas têm mudado muito em relação aos dados utilizados para treinamento. Por meio da análise da distribuição das features podemos ver se os dados novos são muito diferentes em relação aos dados de treino, e analisar possibilidades como *data drift* ou *feature drift*, que exijam um retreinamento do modelo.
 
-Registre o modelo de classificação e o sirva através do MLFlow (ou como uma API local, ou embarcando o modelo na aplicação). Desenvolva um pipeline de aplicação (aplicacao.py) para carregar a base de produção (/data/raw/dataset_kobe_prod.parquet) e aplicar o modelo. Nomeie a rodada (run) do mlflow como “PipelineAplicacao” e publique, tanto uma tabela com os resultados obtidos (artefato como .parquet), quanto log as métricas do novo log loss e f1_score do modelo.
-O modelo é aderente a essa nova base? O que mudou entre uma base e outra? Justifique.
-Descreva como podemos monitorar a saúde do modelo no cenário com e sem a disponibilidade da variável resposta para o modelo em operação.
-Descreva as estratégias reativa e preditiva de retreinamento para o modelo em operação.
+Podemos então adotar estratégias reativa ou preditiva para o modelo em operação: No caso da preditiva, podemos monitorar as mudanças nas features de entrada, e sempre que notarmos mudanças significativas, realizar o retreinamento do modelo; no caso da estratégia reativa, podemos observar o comportamento de métricas, e retreinar o modelo sempre que as métricas estiverem fora de um intervalo esperado.
 
 ## Arquivos e Diretórios Importantes
 
