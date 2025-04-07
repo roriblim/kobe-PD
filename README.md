@@ -18,8 +18,13 @@ Para rodar este projeto, foi criado um ambiente com Python na versão 3.11. Reco
 1. Crie um ambiente virtual com Python 3.11 (recomendado):
 Exemplo:
 ```bash
+#EXEMPLO OPÇÃO 1 - ambiente virtual com conda
 conda create --name PD_env_1 python=3.11 --no-default-packages -y
 conda activate PD_env_1 # sempre que for necessário entrar na env para executar comandos no projeto!
+
+#EXEMPLO OPÇÃO 2 - ambiente virtual com pipenv
+pipenv --python 3.11
+pipenv shell
 ```
 
 2. Instale as dependências:
