@@ -289,8 +289,8 @@ Distribuição das features de treino:
 Distribuição das features de produção:
 ![distribuição-features-prod](data/08_reporting/distribuicao_features_prod.png)
 
-Observando as distribuições acima, é possível ver que há uma grande diferença entre a lat_quadra dos dados de produção (com boa parte abaixo de -0.15), e o lat_quadra dos dados de desenvolvimento (com boa parte acima desse valor). Assim, pode-se perceber que os dados de produção são diferentes dos utilizados para treino dos modelos, e como consequência a adesão dos modelos a esses dados foi muito baixa.
-Analisando mais cuidadosamente, podemos perceber que esse resultado ainda pior da regressão logística está de acordo com a importância das features percebida pelo modelo de regressão logística, conforme já mencionado no item 6 acima. Isso porque o modelo de regressão logística percebeu grande importância na feature de lat_quadra. Todavia, como já vimos, se analisarmos a distribuição das features dos dados de produção , podemos perceber que a latitude, que dá origem à lat_quadra, está bem diferente nos dados de produção em relação aos dados de desenvolvimento.
+Observando as distribuições acima, é possível ver que há uma grande diferença entre a lat_quadra dos dados de produção (com boa parte abaixo de -0.15), e o lat_quadra dos dados de desenvolvimento (com boa parte acima desse valor). Assim, pode-se perceber que os dados de produção são diferentes dos utilizados para treino dos modelos, e como consequência a adesão dos modelos a esses dados novos foi muito baixa.
+Analisando mais cuidadosamente, podemos perceber que esse resultado ainda pior da regressão logística está de acordo com a importância das features percebida pelo modelo de regressão logística, conforme já mencionado no item 6 acima. Isso porque o modelo de regressão logística percebeu grande importância na feature de lat_quadra. Todavia, como já vimos, se analisarmos a distribuição das features dos dados de produção, podemos perceber que a latitude, que dá origem à lat_quadra, está bem diferente nos dados de produção em relação aos dados de desenvolvimento.
 
 Por fim, após subir o MLflow e rodar o projeto com kedro run, o comando utilizado para servir o modelo, como explicado no item 1.4 acima, foi:
 ```bash
@@ -305,13 +305,49 @@ Todavia, se não temos essas variáveis de resposta, uma alternativa, também ex
 
 Podemos então adotar estratégias reativa ou preditiva para o modelo em operação: No caso da preditiva, podemos monitorar as mudanças nas features de entrada, e sempre que notarmos mudanças significativas, realizar o retreinamento do modelo; no caso da estratégia reativa, podemos observar o comportamento de métricas, e retreinar o modelo sempre que as métricas estiverem fora de um intervalo esperado.
 
+
+## Item 8.
+#### Dashboard de monitoramento da operação usando Streamlit
+
+Após servir o modelo, podemos subir o Streamlit conforme o comando do item 1.5 acima:
+
+```bash
+# dentro da env, no diretório kobe/
+cd streamlit
+streamlit run main_API.py 
+```
+
+Após executar tal comando, podemos acessar a porta 8501 da nossa máquina no navegador para acessar a interface do Streamlit.
+
+Pelo Streamlit, podemos **fazer consultas à API** e realizar a inferência a partir de dados passados pelo usuário.
+
+![Streamlit-inferencia](docs/streamlit/streamlit-api-inferencia.png)
+
+Após realizar a consulta, o Streamlit também mostrará um comparativo entre as features do dado consultado em relação aos dados de treinamento:
+
+![Streamlit-comparacao](docs/streamlit/streamlit-api-comparacao.png)
+
+Assim, é possível monitorar se as features consultadas estão de acordo com o dataset de treino, ou se os dados estão muito diferentes. Esse monitoramento pode ser útil na análise de necessidade de retreinamento do modelo.
+
+Além disso, no Streamlit foi criada uma aba que permite o monitoramento das features de todas as requisições feitas à API pelo Streamlit. Para isso, primeiro foi feito o log das features dessas requisições, e esse log está salvo em data/07_model_output/inferencia_streamlit.csv. **Sempre que forem feitas novas requisições à API via Streamlit, os dados das features da requisição serão salvos nesse log**. Em seguida, para a aba de monitoramento, é feito o plot dos dados dessas novas requisições, em comparação aos dados das features utilizadas no treinamento. Dessa forma é possível fazer uma análise de eventual *data drift* ou *feature drift* no modelo.
+
+![Streamlit-monitoramento](docs/streamlit/streamlit-monitoramento-prod.png)
+
+Por fim, ainda no Streamlit, foi disponibilizada uma página que permite a inferência do acerto ou não da cesta pelo modelo de árvore de decisão, mas sem a utilização da API para realizar a chamada.
+
+![Streamlit-DT](docs/streamlit/streamlit-alternativo-DT.png)
+
 ## Arquivos e Diretórios Importantes
 
 
 - `data/`: Diretório para armazenar artefatos do projeto
-- `mlruns/`: Diretório para armazenar métricas, parâmetros, modelos e artefatos que forem rastreados pelo MLflow
+- `mlruns/`: Diretório para armazenar métricas, parâmetros, modelos e artefatos que foram rastreados pelo MLflow
 - `conf/local/mlflow.yml`: Configuração do MLflow 
-
+- `conf/base/`: Diretório com catálogo e parâmetros utilizados no projeto
+- `docs/`: Diretório contendo diagramas do projeto e prints de registros do MLflow
+- `src/`: Diretório com o código-fonte do projeto
+- `notebooks/`: Diretório com notebooks utilizados na etapa de análise e desenvolvimento do projeto
+- `streamlit/`: Diretório com os arquivos do Streamlit
 (...)
 
 --------
