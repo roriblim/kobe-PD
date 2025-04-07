@@ -128,11 +128,11 @@ Além disso, após a execução do projeto, o melhor modelo foi servido em uma A
 ## Item 4.
 #### Artefatos criados ao longo do projeto e sua descrição:
  - Em data/01_raw:
-   - **dataset_kobe_dev.parquet**: dataset original com os dados iniciais (features e targets) de desenvolvimento no formato parquet;
-   - **dataset_kobe_prod.parquet**: dataset original com os dados iniciais (features e targets) de produção no formato parquet;
+   - **dataset_kobe_dev.parquet**: dataset original com os dados iniciais (features e targets) de desenvolvimento no formato parquet;será utilizado para treinamento e validação dos modelos (um dos quais será servido na API);
+   - **dataset_kobe_prod.parquet**: dataset original com os dados iniciais (features e targets) de produção no formato parquet; será utilizado para inferência dos dados com os modelos já treinados simulando dados reais de produção.
    --------------   
  - Em data/03_primary:
-   - **primary_dev.csv**: dataset com os dados de desenvolvimento após tratamento inicial dos dados (remoção de duplicatas, seleção das features que serão utilizadas no projeto, retirada de dados nulos e transformação de playoffs em booleano) em formato csv;
+   - **primary_dev.csv**: dataset com os dados de desenvolvimento após tratamento inicial dos dados (remoção de duplicatas, seleção das features que serão utilizadas no projeto, remoção de dados nulos/faltantes e transformação de playoffs em booleano) em formato csv;
    --------------
  - Em data/04_feature:
    - **data_filtered.parquet**: dataset com os dados de desenvolvimento após feature engineering (transformação de latitude e longitude em dados com maior informação para o modelo - posição na quadra - representados por lat_quadra e lon_quadra) em formato parquet;
@@ -212,6 +212,15 @@ Após a separação em treino e teste, os datasets de treino e teste foram armaz
 A escolha de treino e teste precisa ser bem feita e pode afetar no resultado final na medida em que, se o dataset de treino não é representativo dos dados de inferência (teste ou produção), o modelo treinado pode ficar bem ajustado a um tipo específico de dado, mas não a outro. Isso pode facilitar a ocorrência do problema de overfitting, que é quando meu modelo se ajusta bem e performa bem para os dados de treino, e performa mal para os dados de teste, por deixar o modelo enviesado para um tipo específico de dado. Ou ainda, se eu tenho predominância de um tipo de target para treino e predominância de outro para teste, o meu resultado de acurácia pode estar enviesado para um target específico.
 
  Dessa forma, algumas estratégias para evitar esse problema são: **a divisão entre treino e teste de forma estratificada** - dessa forma, a proporção entre os targets permanecerá entre os grupos de treino e teste - ; e ainda, **a validação cruzada** durante a fase de treinamento - por treinar e validar em diferentes configurações, a validação cruzada ajuda a reduzir o impacto de eventuais divisões enviesadas.
+
+ Nessa sessão de preparação de dados, foi possível ainda obter os gráficos da distribuição das features de treinamento e de teste, e perceber que os dados nesses datasets têm distribuições parecidas:
+
+Distribuição das features no dataset de treino:
+![distribuição-features-treino](data/08_reporting/distribuicao_features_train.png)
+
+Distribuição das features no dataset de teste:
+![distribuição-features-teste](data/08_reporting/distribuicao_features_test.png)
+
 
 ## Item 6.
 #### Pipeline de treinamento
@@ -298,7 +307,9 @@ Por fim, após subir o MLflow e rodar o projeto com kedro run, o comando utiliza
 MLFLOW_TRACKING_URI=file://$PWD/mlruns mlflow models serve -m models:/best_model/latest --env-manager=local --port 5002
 ```
 
-Neste projeto, conseguimos perceber então que uma forma de monitorar a saúde do modelo no cenário em que temos disponível a variável de resposta seria por meio do cálculo das métricas (F1 Score, Log loss, roc auc, recall, precisão, entre outras), e de sua comparação com as métricas obtidas com os dados de teste à época em que foi realizado o treinamento do modelo. Quando temos o target real, o cálculo dessas métricas se torna possível, e a análise da qualidade e da adesão do modelo aos dados de produção se torna mais facilitada.
+Neste projeto, conseguimos perceber então que uma forma de monitorar a saúde do modelo no cenário em que temos disponível a variável de resposta seria por meio do cálculo das métricas (F1 Score, Log loss, roc auc, recall, precisão, entre outras), e de sua comparação com as métricas obtidas com os dados de teste à época em que foi realizado o treinamento do modelo. 
+
+Quando temos o target real, o cálculo dessas métricas se torna possível, e a análise da qualidade e da adesão do modelo aos dados de produção se torna mais facilitada.
 Isso pode ser feito por meio do log dos dados de entrada no modelo para inferência, bem como de seu target esperado, e posterior cálculo das métricas a partir dos dados registrados.
 
 Todavia, se não temos essas variáveis de resposta, uma alternativa, também explorada neste projeto, conforme demonstrado acima, é a análise das features, e se elas têm mudado muito em relação aos dados utilizados para treinamento. Por meio da análise da distribuição das features podemos ver se os dados novos são muito diferentes em relação aos dados de treino, e analisar possibilidades como *data drift* ou *feature drift*, que exijam um retreinamento do modelo.
