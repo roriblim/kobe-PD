@@ -348,7 +348,7 @@ Por fim, ainda no Streamlit, foi disponibilizada uma página que permite a infer
 - `src/`: Diretório com o código-fonte do projeto
 - `notebooks/`: Diretório com notebooks utilizados na etapa de análise e desenvolvimento do projeto
 - `streamlit/`: Diretório com os arquivos do Streamlit
-(...)
+
 
 --------
 
